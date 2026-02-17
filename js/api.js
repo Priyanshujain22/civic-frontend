@@ -109,12 +109,12 @@ export async function createComplaint(complaintData) {
     }
 }
 
-export async function updateComplaintStatus(id, status) {
+export async function updateComplaintStatus(id, status, resolution_notes = null) {
     try {
         const response = await fetch(`${API_URL}/officer/update-status`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify({ id, status })
+            body: JSON.stringify({ id, status, resolution_notes })
         });
 
         const result = await response.json();

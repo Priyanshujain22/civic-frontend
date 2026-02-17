@@ -63,9 +63,28 @@
                     <h5 class="modal-title">Complaint Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- Dynamic content would go here, omitting detailed implementation for brevity as logic is in main.js -->
-                    <p class="text-muted text-center">Detail view implementation planned for future iteration.</p>
+                <div class="modal-body" id="viewModalBody">
+                    <div class="mb-3">
+                        <label class="fw-bold">Category:</label>
+                        <p id="viewCategory" class="mb-0"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Description:</label>
+                        <p id="viewDescription" class="mb-0"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Location:</label>
+                        <p id="viewLocation" class="mb-0"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Status:</label>
+                        <div id="viewStatus"></div>
+                    </div>
+                    <div id="resolutionSection" class="mt-4 p-3 bg-light border-start border-4 border-success d-none">
+                        <label class="fw-bold text-success"><i class="fas fa-comment-check me-1"></i> Officer Resolution
+                            Notes:</label>
+                        <p id="viewResolutionNotes" class="mb-0 italic"></p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

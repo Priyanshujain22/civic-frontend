@@ -128,6 +128,31 @@ async function initCitizenDashboard() {
             </td>
         </tr>
     `).join('');
+
+    // Event delegation for View button
+    tableBody.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action="view"]');
+        if (btn) {
+            const id = parseInt(btn.dataset.id);
+            const complaint = myComplaints.find(c => c.id === id);
+            if (complaint) {
+                document.getElementById('viewCategory').innerText = complaint.category_name;
+                document.getElementById('viewDescription').innerText = complaint.description;
+                document.getElementById('viewLocation').innerText = complaint.location;
+                document.getElementById('viewStatus').innerHTML = getStatusBadge(complaint.status);
+
+                const resSection = document.getElementById('resolutionSection');
+                if (complaint.status === 'Resolved' && complaint.resolution_notes) {
+                    document.getElementById('viewResolutionNotes').innerText = complaint.resolution_notes;
+                    resSection.classList.remove('d-none');
+                } else {
+                    resSection.classList.add('d-none');
+                }
+
+                new bootstrap.Modal(document.getElementById('viewModal')).show();
+            }
+        }
+    });
 }
 
 function initComplaintForm() {
@@ -271,8 +296,9 @@ async function initOfficerDashboard() {
         e.preventDefault();
         const id = document.getElementById('updateComplaintId').value;
         const status = document.getElementById('updateStatus').value;
+        const resolution_notes = document.getElementById('updateNotes').value;
 
-        const response = await API.updateComplaintStatus(id, status);
+        const response = await API.updateComplaintStatus(id, status, resolution_notes);
         if (response.success) {
             showAlert('Status Updated');
             setTimeout(() => location.reload(), 1000);
