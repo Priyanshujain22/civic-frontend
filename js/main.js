@@ -177,9 +177,15 @@ async function initAdminDashboard() {
             <td>${getStatusBadge(c.status)}</td>
             <td>${c.officer_name || '<span class="text-muted">Unassigned</span>'}</td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" data-action="assign" data-id="${c.id}">
-                    <i class="fas fa-edit"></i> Assign
-                </button>
+                ${c.status === 'Resolved' ? `
+                    <button class="btn btn-sm btn-success w-100" disabled>
+                        <i class="fas fa-check-circle me-1"></i> Completed
+                    </button>
+                ` : `
+                    <button class="btn btn-sm btn-outline-primary w-100" data-action="assign" data-id="${c.id}">
+                        <i class="fas fa-edit me-1"></i> Assign
+                    </button>
+                `}
             </td>
         </tr>
     `).join('');
