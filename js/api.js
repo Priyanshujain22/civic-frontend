@@ -1,5 +1,5 @@
-// API Base URL
-const API_URL = 'http://localhost:5000/api';
+// API Base URL - use environment variable if targeting production build, otherwise fallback to localhost
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // --- Auth Utilities ---
 
@@ -43,7 +43,14 @@ export async function loginUser(email, password) {
         }
     } catch (error) {
         console.error('Login Error Details:', error);
-        return { success: false, message: 'Network error: Check if Backend is running at port 5000' };
+
+        // Detailed error message for development, generic for production
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const message = isLocal
+            ? 'Network error: Check if Backend is running at port 5000'
+            : 'Unable to connect to the server. Please check your internet connection or try again later.';
+
+        return { success: false, message };
     }
 }
 
