@@ -40,14 +40,8 @@
                             placeholder="name@example.com">
                     </div>
 
-                    <div class="mb-3">
-                        <label for="registerRole" class="form-label">I am a...</label>
-                        <select class="form-select" id="registerRole" required>
-                            <option value="citizen" selected>Citizen</option>
-                            <option value="officer">Officer (Requires Approval)</option>
-                            <option value="admin">System Administrator</option>
-                        </select>
-                    </div>
+                    <!-- Role is always citizen for public registration -->
+                    <input type="hidden" id="registerRole" value="citizen">
 
                     <div class="mb-3">
                         <label for="registerPassword" class="form-label">Password</label>
