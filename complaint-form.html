@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Complaint - CivicConnect</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <!-- Navbar injected via JS -->
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0 text-primary">File a New Complaint</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="complaintForm">
+                            <div class="mb-3">
+                                <label for="complaintCategory" class="form-label">Category *</label>
+                                <select class="form-select" id="complaintCategory" required>
+                                    <option value="">Select Category...</option>
+                                    <option value="Road Damage">Road Damage (Potholes)</option>
+                                    <option value="Garbage">Garbage / Waste</option>
+                                    <option value="Street Light">Street Light Failure</option>
+                                    <option value="Water Leakage">Water Pipe Leakage</option>
+                                    <option value="Drainage">Drainage/Sewage Issue</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="complaintDescription" class="form-label">Description *</label>
+                                <textarea class="form-control" id="complaintDescription" rows="4" required
+                                    placeholder="Describe the issue in detail..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="complaintLocation" class="form-label">Location/Landmark *</label>
+                                <input type="text" class="form-control" id="complaintLocation" required
+                                    placeholder="e.g., Near City Hospital, Main Street">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="complaintImage" class="form-label">Upload Photo (Optional)</label>
+                                <input type="file" class="form-control" id="complaintImage" accept="image/*">
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg"
+                                    data-action="create-complaint">Submit Complaint</button>
+                                <a href="citizen-dashboard.html" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Main Module -->
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
