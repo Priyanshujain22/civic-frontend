@@ -12,6 +12,7 @@ export default defineConfig({
                 adminDashboard: resolve(__dirname, 'admin-dashboard.html'),
                 officerDashboard: resolve(__dirname, 'officer-dashboard.html'),
                 complaintForm: resolve(__dirname, 'complaint-form.html'),
+                profile: resolve(__dirname, 'profile.html'),
             }
         }
     }
