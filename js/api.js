@@ -1,5 +1,5 @@
-// API Base URL - prioritizes VITE_API_BASE_URL, falls back to localhost:5000
-export const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// API Base URL - Hardcoded to production for reliability, or uses env var
+export const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://civic-backend-three.vercel.app/api';
 
 // ALWAYS log the API URL being used to help with Vercel debugging
 console.log('Using API Base URL:', API_URL);

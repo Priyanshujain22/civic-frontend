@@ -6,8 +6,9 @@ import * as API from './api.js';
 document.addEventListener('DOMContentLoaded', async () => {
     renderNavbar();
 
-    // Page Routing Logic
-    const path = window.location.pathname;
+    // Page Routing Logic - Normalize path to handle both hyphen and underscore
+    const path = window.location.pathname.replace(/_/g, '-');
+    console.log('Normalized Path:', path);
 
     if (path.includes('login.html')) initLogin();
     else if (path.includes('register.html')) initRegister();
