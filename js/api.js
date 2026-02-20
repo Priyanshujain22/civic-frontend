@@ -1,10 +1,8 @@
 // API Base URL - prioritizes VITE_API_BASE_URL, falls back to localhost:5000
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
-// Debug logging for connection troubleshooting
-if (import.meta.env.MODE === 'development') {
-    console.log('API Base URL:', API_URL);
-}
+// ALWAYS log the API URL being used to help with Vercel debugging
+console.log('Using API Base URL:', API_URL);
 
 // --- Auth Utilities ---
 
