@@ -275,7 +275,20 @@ async function initAdminDashboard() {
         return;
     }
 
-    const complaints = await API.fetchComplaints();
+    const response = await API.fetchComplaints();
+    if (!response.success && !response.data) {
+        showAlert('Error loading complaints: ' + (response.message || 'Unknown error'), 'danger');
+        return;
+    }
+    const complaints = response.data || [];
+
+    // Fetch and populate officers for dispatch
+    const officers = await API.fetchUsers('officer');
+    const officerSelect = document.getElementById('officerSelect');
+    if (officerSelect && officers.length) {
+        officerSelect.innerHTML = '<option value="">Select Officer...</option>' +
+            officers.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+    }
 
     // Stats
     document.getElementById('totalStats').innerText = complaints.length;
@@ -356,7 +369,12 @@ async function initOfficerDashboard() {
         return;
     }
 
-    const myComplaints = await API.fetchComplaints();
+    const response = await API.fetchComplaints();
+    if (!response.success && !response.data) {
+        showAlert('Error loading tasks: ' + (response.message || 'Unknown error'), 'danger');
+        return;
+    }
+    const myComplaints = response.data || [];
 
     const container = document.getElementById('tasksContainer');
     if (!myComplaints.length) {
@@ -407,9 +425,9 @@ async function initOfficerDashboard() {
 
         let response;
         if (status === 'Resolved') {
-            response = await fetch(`${API_URL}/officer/upload-proof`, {
+            response = await fetch(`${API.API_URL}/officer/upload-proof`, {
                 method: 'POST',
-                headers: getAuthHeader(),
+                headers: API.getAuthHeader(),
                 body: JSON.stringify({ complaint_id: id, proof_notes: resolution_notes })
             }).then(r => r.json());
         } else {
@@ -540,14 +558,15 @@ async function initVendorDashboard() {
     const quoteForm = document.getElementById('quoteForm');
 
     const loadData = async () => {
-        const complaints = await API.fetchComplaints();
+        const response = await API.fetchComplaints();
+        const complaints = response.data || [];
         renderAvailableJobs(complaints, jobsList);
 
         // Fetch specific vendor data for quotes and active jobs
-        const myQuotes = await API.fetchComplaints(); // We need a specific endpoint for vendor's own quotes?
+        // const myQuotes = await API.fetchComplaints(); 
         // Actually vendor_routes has /my-jobs
         const activeJobs = await fetch(`${API.API_URL}/vendor/my-jobs`, {
-            headers: { 'Authorization': `Bearer ${API.getCurrentUser().token}` }
+            headers: API.getAuthHeader()
         }).then(r => r.json());
 
         if (activeJobs.success) {

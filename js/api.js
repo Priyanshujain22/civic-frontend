@@ -6,7 +6,7 @@ console.log('Using API Base URL:', API_URL);
 
 // --- Auth Utilities ---
 
-function getAuthHeader() {
+export function getAuthHeader() {
     const user = getCurrentUser();
     if (user && user.token) {
         return { 'Authorization': `Bearer ${user.token}`, 'Content-Type': 'application/json' };
