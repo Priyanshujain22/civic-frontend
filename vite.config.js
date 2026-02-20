@@ -13,6 +13,7 @@ export default defineConfig({
                 officerDashboard: resolve(__dirname, 'officer-dashboard.html'),
                 complaintForm: resolve(__dirname, 'complaint-form.html'),
                 profile: resolve(__dirname, 'profile.html'),
+                forgotPassword: resolve(__dirname, 'forgot-password.html'),
             }
         }
     }

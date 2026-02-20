@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (path.includes('admin-dashboard.html')) checkRoleAccess('admin', initAdminDashboard);
     else if (path.includes('officer-dashboard.html')) checkRoleAccess('officer', initOfficerDashboard);
     else if (path.includes('profile.html')) initProfilePage();
+    else if (path.includes('forgot-password.html')) initForgotPassword();
     else if (path.endsWith('/') || path.includes('index.html')) initHomePage();
 });
 
@@ -386,4 +387,33 @@ function initHomePage() {
             raiseBtn.innerText = 'Go to Dashboard';
         }
     }
+}
+
+function initForgotPassword() {
+    const form = document.getElementById('forgotPasswordForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('resetEmail').value;
+        const btn = document.getElementById('resetBtn');
+        const originalText = btn.innerText;
+
+        // Show loading state
+        btn.innerText = 'Sending...';
+        btn.disabled = true;
+
+        const response = await API.requestPasswordReset(email);
+
+        btn.innerText = originalText;
+        btn.disabled = false;
+
+        if (response.success) {
+            document.getElementById('sentEmail').innerText = email;
+            const modal = new bootstrap.Modal(document.getElementById('resetSuccessModal'));
+            modal.show();
+        } else {
+            showAlert(response.message || 'Failed to send reset link', 'danger');
+        }
+    });
 }
