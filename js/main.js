@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (path.includes('admin-dashboard.html')) checkRoleAccess('admin', initAdminDashboard);
     else if (path.includes('officer-dashboard.html')) checkRoleAccess('officer', initOfficerDashboard);
     else if (path.includes('profile.html')) initProfilePage();
+    else if (path.endsWith('/') || path.includes('index.html')) initHomePage();
 });
 
 // Access Control Helper
@@ -364,4 +365,25 @@ async function initProfilePage() {
             showAlert(response.message || 'Failed to update profile', 'danger');
         }
     });
+}
+
+/**
+ * Initialize dynamic content for the Home Page
+ */
+function initHomePage() {
+    const user = API.getCurrentUser();
+    const raiseBtn = document.getElementById('heroRaiseBtn');
+
+    if (user && raiseBtn) {
+        // Change logic based on role
+        if (user.role === 'citizen') {
+            raiseBtn.href = 'complaint-form.html';
+        } else if (user.role === 'admin') {
+            raiseBtn.href = 'admin-dashboard.html';
+            raiseBtn.innerText = 'Go to Dashboard';
+        } else if (user.role === 'officer') {
+            raiseBtn.href = 'officer-dashboard.html';
+            raiseBtn.innerText = 'Go to Dashboard';
+        }
+    }
 }
