@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (path.includes('complaint-form.html')) checkRoleAccess('citizen', initComplaintForm);
     else if (path.includes('admin-dashboard.html')) checkRoleAccess('admin', initAdminDashboard);
     else if (path.includes('officer-dashboard.html')) checkRoleAccess('officer', initOfficerDashboard);
+    else if (path.includes('vendor-dashboard.html')) checkRoleAccess('vendor', initVendorDashboard);
     else if (path.includes('profile.html')) initProfilePage();
     else if (path.includes('forgot-password.html')) initForgotPassword();
     else if (path.endsWith('/') || path.includes('index.html')) initHomePage();
@@ -33,6 +34,7 @@ function checkRoleAccess(requiredRole, initFunction) {
         if (user.role === 'citizen') window.location.href = 'citizen-dashboard.html';
         else if (user.role === 'admin') window.location.href = 'admin-dashboard.html';
         else if (user.role === 'officer') window.location.href = 'officer-dashboard.html';
+        else if (user.role === 'vendor') window.location.href = 'vendor-dashboard.html';
         return;
     }
 
@@ -67,6 +69,7 @@ function initLogin() {
             if (role === 'citizen') window.location.href = 'citizen-dashboard.html';
             else if (role === 'admin') window.location.href = 'admin-dashboard.html';
             else if (role === 'officer') window.location.href = 'officer-dashboard.html';
+            else if (role === 'vendor') window.location.href = 'vendor-dashboard.html';
         } else {
             showAlert(response.message || 'Login failed', 'danger');
         }
@@ -77,14 +80,25 @@ function initRegister() {
     const form = document.getElementById('registerForm');
     if (!form) return;
 
+    const roleSelect = document.getElementById('registerRole');
+    const vendorFields = document.getElementById('vendorFields');
+
+    roleSelect.addEventListener('change', () => {
+        vendorFields.style.display = roleSelect.value === 'vendor' ? 'block' : 'none';
+        // Make fields required if vendor
+        document.getElementById('businessName').required = roleSelect.value === 'vendor';
+    });
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userData = {
             name: document.getElementById('registerName').value,
             email: document.getElementById('registerEmail').value,
             phone: document.getElementById('registerPhone').value,
-            role: document.getElementById('registerRole').value,
-            password: document.getElementById('registerPassword').value
+            role: roleSelect.value,
+            password: document.getElementById('registerPassword').value,
+            business_name: document.getElementById('businessName')?.value,
+            service_type: document.getElementById('serviceType')?.value
         };
 
         const confirmPass = document.getElementById('registerConfirmPassword').value;
@@ -97,6 +111,8 @@ function initRegister() {
         if (response.success) {
             showAlert('Registration Successful! Please login.');
             setTimeout(() => window.location.href = 'login.html', 1500);
+        } else {
+            showAlert(response.message || 'Registration failed', 'danger');
         }
     });
 }
@@ -125,19 +141,30 @@ async function initCitizenDashboard() {
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td>${getStatusBadge(c.status)}</td>
             <td>
-                <button class="btn btn-sm btn-info text-white" data-action="view" data-id="${c.id}">
-                    <i class="fas fa-eye"></i> View
-                </button>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary" data-action="view" data-id="${c.id}">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    ${c.status === 'Awaiting Quotes' ? `
+                        <button class="btn btn-sm btn-info text-white" data-action="quotes" data-id="${c.id}">
+                            <i class="fas fa-file-invoice-dollar"></i> Quotes
+                        </button>
+                    ` : ''}
+                </div>
             </td>
         </tr>
     `).join('');
 
-    // Event delegation for View button
-    tableBody.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-action="view"]');
-        if (btn) {
-            const id = parseInt(btn.dataset.id);
-            const complaint = myComplaints.find(c => c.id === id);
+    // Event delegation
+    tableBody.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+
+        if (action === 'view') {
+            const complaint = complaints.find(c => c.id == id);
             if (complaint) {
                 document.getElementById('viewCategory').innerText = complaint.category_name;
                 document.getElementById('viewDescription').innerText = complaint.description;
@@ -154,8 +181,57 @@ async function initCitizenDashboard() {
 
                 new bootstrap.Modal(document.getElementById('viewModal')).show();
             }
+        } else if (action === 'quotes') {
+            const modal = new bootstrap.Modal(document.getElementById('quotesModal'));
+            modal.show();
+            await loadQuotes(id);
         }
     });
+}
+
+async function loadQuotes(complaintId) {
+    const table = document.getElementById('quotesTable');
+    const tableBody = document.getElementById('quotesTableBody');
+    const loading = document.getElementById('quotesLoading');
+    const noQuotes = document.getElementById('noQuotes');
+
+    loading.style.display = 'block';
+    table.style.display = 'none';
+    noQuotes.classList.add('d-none');
+
+    const quotes = await API.fetchComplaintQuotes(complaintId);
+    loading.style.display = 'none';
+
+    if (quotes.length === 0) {
+        noQuotes.classList.remove('d-none');
+    } else {
+        table.style.display = 'table';
+        tableBody.innerHTML = quotes.map(q => `
+            <tr>
+                <td><strong>${q.business_name || 'Vendor'}</strong></td>
+                <td class="text-success fw-bold">₹${q.price}</td>
+                <td>${q.estimated_time}</td>
+                <td>
+                    <button class="btn btn-sm btn-success rounded-pill px-3 btn-approve-quote" 
+                            data-complaint="${complaintId}" data-vendor="${q.vendor_id}">
+                        Hire
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        tableBody.querySelectorAll('.btn-approve-quote').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (confirm('Are you sure you want to hire this vendor?')) {
+                    const res = await API.approveQuote(btn.dataset.complaint, btn.dataset.vendor);
+                    if (res.success) {
+                        showAlert('Vendor hired successfully!');
+                        location.reload();
+                    }
+                }
+            });
+        });
+    }
 }
 
 function initComplaintForm() {
@@ -210,37 +286,52 @@ async function initAdminDashboard() {
                         <i class="fas fa-check-circle me-1"></i> Completed
                     </button>
                 ` : `
-                    <button class="btn btn-sm btn-outline-primary w-100" data-action="assign" data-id="${c.id}">
-                        <i class="fas fa-edit me-1"></i> Assign
+                    <button class="btn btn-sm btn-dark w-100" data-action="dispatch" data-id="${c.id}">
+                        <i class="fas fa-paper-plane me-1"></i> Dispatch
                     </button>
                 `}
             </td>
         </tr>
     `).join('');
 
-    // Event delegation for Assign buttons
+    // Event delegation for Dispatch buttons
     tableBody.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-action="assign"]');
+        const btn = e.target.closest('button[data-action="dispatch"]');
         if (btn) {
-            const id = btn.dataset.id;
-            document.getElementById('assignComplaintId').value = id;
-            new bootstrap.Modal(document.getElementById('assignModal')).show();
+            document.getElementById('dispatchComplaintId').value = btn.dataset.id;
+            new bootstrap.Modal(document.getElementById('dispatchModal')).show();
         }
     });
 
-    // Assign Form Submit
-    document.getElementById('assignForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('assignComplaintId').value;
-        const officerId = 2; // HARDCODED DEMO for "Officer Raj" ID from SQL seed
-        // Proper way: Fetch officers list and map naming to ID.
-        // For now, since select has names, we'll force ID 2 if they select Officer Raj.
-        // TODO: Update Admin Dashboard to fetch users and populate dropdown dynamically ideally.
+    // Toggle dispatch fields
+    document.querySelectorAll('input[name="resolutionType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const isPrivate = e.target.value === 'private';
+            document.getElementById('govDispatchFields').style.display = isPrivate ? 'none' : 'block';
+            document.getElementById('privateDispatchFields').style.display = isPrivate ? 'block' : 'none';
+        });
+    });
 
-        const response = await API.assignOfficer(id, officerId);
+    // Dispatch Form Submit
+    document.getElementById('dispatchForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('dispatchComplaintId').value;
+        const resType = document.querySelector('input[name="resolutionType"]:checked').value;
+
+        let response;
+        if (resType === 'private') {
+            response = await API.routeToPrivate(id);
+        } else {
+            const officerId = document.getElementById('officerSelect').value;
+            if (!officerId) return showAlert('Please select an officer', 'danger');
+            response = await API.routeToGovernment(id, officerId);
+        }
+
         if (response.success) {
-            showAlert(`Assigned successfully`);
+            showAlert(`Complaint dispatched successfully`);
             setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert(response.message, 'danger');
         }
     });
 }
@@ -301,9 +392,19 @@ async function initOfficerDashboard() {
         const status = document.getElementById('updateStatus').value;
         const resolution_notes = document.getElementById('updateNotes').value;
 
-        const response = await API.updateComplaintStatus(id, status, resolution_notes);
+        let response;
+        if (status === 'Resolved') {
+            response = await fetch(`${API_URL}/officer/upload-proof`, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ complaint_id: id, proof_notes: resolution_notes })
+            }).then(r => r.json());
+        } else {
+            response = await API.updateComplaintStatus(id, status, resolution_notes);
+        }
+
         if (response.success) {
-            showAlert('Status Updated');
+            showAlert('Status Updated & Proof Logged');
             setTimeout(() => location.reload(), 1000);
         }
     });
@@ -415,5 +516,117 @@ function initForgotPassword() {
         } else {
             showAlert(response.message || 'Failed to send reset link', 'danger');
         }
+    });
+}
+
+async function initVendorDashboard() {
+    const jobsList = document.getElementById('jobsList');
+    const quotesTableBody = document.getElementById('quotesTableBody');
+    const activeJobsList = document.getElementById('activeJobsList');
+    const refreshBtn = document.getElementById('refreshJobs');
+    const quoteForm = document.getElementById('quoteForm');
+
+    const loadData = async () => {
+        const complaints = await API.fetchComplaints();
+        renderAvailableJobs(complaints, jobsList);
+
+        // Fetch specific vendor data for quotes and active jobs
+        const myQuotes = await API.fetchComplaints(); // We need a specific endpoint for vendor's own quotes?
+        // Actually vendor_routes has /my-jobs
+        const activeJobs = await fetch(`${API.API_URL}/vendor/my-jobs`, {
+            headers: { 'Authorization': `Bearer ${API.getCurrentUser().token}` }
+        }).then(r => r.json());
+
+        if (activeJobs.success) {
+            renderActiveJobs(activeJobs.data, activeJobsList);
+            document.getElementById('activeBidsCount').innerText = activeJobs.data.length;
+        }
+    };
+
+    if (refreshBtn) refreshBtn.addEventListener('click', loadData);
+
+    if (quoteForm) {
+        quoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const complaintId = document.getElementById('quoteComplaintId').value;
+            const price = document.getElementById('quotePrice').value;
+            const time = document.getElementById('quoteTime').value;
+
+            const response = await API.submitQuote(complaintId, price, time);
+            if (response.success) {
+                showAlert('Quotation Submitted!');
+                bootstrap.Modal.getInstance(document.getElementById('quoteModal')).hide();
+                loadData();
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        });
+    }
+
+    loadData();
+}
+
+function renderAvailableJobs(jobs, container) {
+    if (!container) return;
+    if (jobs.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">No new jobs available in the marketplace.</p></div>';
+        return;
+    }
+
+    container.innerHTML = jobs.map(job => `
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 job-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">${job.category_name}</span>
+                        <small class="text-muted"><i class="far fa-clock me-1"></i>${new Date(job.created_at).toLocaleDateString()}</small>
+                    </div>
+                    <h5 class="card-title fw-bold">${job.description.substring(0, 50)}...</h5>
+                    <p class="text-muted mb-3"><i class="fas fa-map-marker-alt me-2"></i>${job.location}</p>
+                    <button class="btn btn-primary w-100 rounded-pill btn-quote" data-id="${job.id}">
+                        <i class="fas fa-plus-circle me-2"></i>Submit Quote
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.btn-quote').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('quoteComplaintId').value = btn.dataset.id;
+            new bootstrap.Modal(document.getElementById('quoteModal')).show();
+        });
+    });
+}
+
+function renderActiveJobs(jobs, container) {
+    if (!container) return;
+    container.innerHTML = jobs.map(job => `
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold">Job #${job.complaint_id}</h5>
+                    <p class="text-muted">${job.description}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-success fw-bold">Accepted: ₹${job.price}</span>
+                        <button class="btn btn-sm btn-success rounded-pill btn-complete" data-id="${job.complaint_id}">
+                            Mark Completed
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.btn-complete').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (confirm('Mark this job as completed?')) {
+                const res = await API.updateComplaintStatus(btn.dataset.id, 'Resolved');
+                if (res.success) {
+                    showAlert('Job completed!');
+                    location.reload();
+                }
+            }
+        });
     });
 }

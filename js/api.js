@@ -1,5 +1,5 @@
 // API Base URL - prioritizes VITE_API_BASE_URL, falls back to localhost:5000
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+export const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // ALWAYS log the API URL being used to help with Vercel debugging
 console.log('Using API Base URL:', API_URL);
@@ -82,6 +82,7 @@ export async function fetchComplaints() {
     let endpoint = '/complaints/my'; // Default for citizen
     if (user.role === 'admin') endpoint = '/admin/complaints';
     if (user.role === 'officer') endpoint = '/officer/assigned';
+    if (user.role === 'vendor') endpoint = '/vendor/available';
 
     try {
         const response = await fetch(`${API_URL}${endpoint}`, {
@@ -96,82 +97,112 @@ export async function fetchComplaints() {
     }
 }
 
-export async function createComplaint(complaintData) {
+// --- Hybrid Dispatcher APIs ---
+
+export async function routeToGovernment(complaint_id, officer_id) {
     try {
-        const response = await fetch(`${API_URL}/complaints`, {
+        const response = await fetch(`${API_URL}/admin/route/government`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify(complaintData)
+            body: JSON.stringify({ complaint_id, officer_id })
         });
-
         const result = await response.json();
         return result.success ? { success: true } : { success: false, message: result.message };
     } catch (error) {
-        console.error('Create Complaint Error:', error);
+        console.error('Route Gov Error:', error);
         return { success: false, message: 'Network error' };
     }
 }
 
-export async function updateComplaintStatus(id, status, resolution_notes = null) {
+export async function routeToPrivate(complaint_id) {
     try {
-        const response = await fetch(`${API_URL}/officer/update-status`, {
+        const response = await fetch(`${API_URL}/admin/route/private`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify({ id, status, resolution_notes })
+            body: JSON.stringify({ complaint_id })
         });
-
         const result = await response.json();
         return result.success ? { success: true } : { success: false, message: result.message };
     } catch (error) {
-        console.error('Update Status Error:', error);
+        console.error('Route Private Error:', error);
         return { success: false, message: 'Network error' };
     }
 }
 
-export async function assignOfficer(complaintId, officerId) {
+// --- Vendor & Marketplace APIs ---
+
+export async function submitQuote(complaint_id, price, estimated_time) {
     try {
-        const response = await fetch(`${API_URL}/admin/assign`, {
+        const response = await fetch(`${API_URL}/vendor/quote`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify({ complaint_id: complaintId, officer_id: officerId })
+            body: JSON.stringify({ complaint_id, price, estimated_time })
         });
-
         const result = await response.json();
         return result.success ? { success: true } : { success: false, message: result.message };
     } catch (error) {
-        console.error('Assign Officer Error:', error);
+        console.error('Submit Quote Error:', error);
         return { success: false, message: 'Network error' };
     }
 }
-export async function fetchUserProfile() {
+
+export async function fetchComplaintQuotes(complaintId) {
     try {
-        const response = await fetch(`${API_URL}/auth/profile`, {
+        const response = await fetch(`${API_URL}/complaints/${complaintId}/quotes`, {
             headers: getAuthHeader()
         });
-
         const result = await response.json();
-        return result.success ? result.data : null;
+        return result.success ? result.data : [];
     } catch (error) {
-        console.error('Fetch Profile Error:', error);
-        return null;
+        console.error('Fetch Quotes Error:', error);
+        return [];
     }
 }
 
-export async function updateUserProfile(userData) {
+export async function approveQuote(complaintId, vendor_id) {
     try {
-        const response = await fetch(`${API_URL}/auth/profile/update`, {
+        const response = await fetch(`${API_URL}/quotes/${complaintId}/approve`, {
             method: 'POST',
             headers: getAuthHeader(),
-            body: JSON.stringify(userData)
+            body: JSON.stringify({ vendor_id })
         });
-
         const result = await response.json();
         return result.success ? { success: true } : { success: false, message: result.message };
     } catch (error) {
-        console.error('Update Profile Error:', error);
+        console.error('Approve Quote Error:', error);
         return { success: false, message: 'Network error' };
     }
-} export async function requestPasswordReset(email) {
+}
+
+export async function verifyVendor(vendor_id) {
+    try {
+        const response = await fetch(`${API_URL}/admin/vendors/verify`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ vendor_id })
+        });
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Verify Vendor Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
+
+export async function fetchUsers(role = null) {
+    try {
+        let url = `${API_URL}/admin/users`;
+        if (role) url += `?role=${role}`;
+        const response = await fetch(url, { headers: getAuthHeader() });
+        const result = await response.json();
+        return result.success ? result.data : [];
+    } catch (error) {
+        console.error('Fetch Users Error:', error);
+        return [];
+    }
+}
+
+export async function requestPasswordReset(email) {
     try {
         const response = await fetch(`${API_URL}/auth/forgot-password`, {
             method: 'POST',

@@ -27,42 +27,61 @@
                             <label for="registerName" class="form-label">Full Name</label>
                             <input type="text" class="form-control" id="registerName" required placeholder="John Doe">
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="registerPhone" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="registerPhone" required
-                                placeholder="+1 234 567 890">
+                        <div class="mb-3">
+                            <label for="registerRole" class="form-label">Register As *</label>
+                            <select class="form-select" id="registerRole" required>
+                                <option value="citizen">Citizen</option>
+                                <option value="vendor">Private Vendor / Service Provider</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="registerEmail" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="registerEmail" required
-                            placeholder="name@example.com">
-                    </div>
+                        <div id="vendorFields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="businessName" class="form-label">Business Name *</label>
+                                <input type="text" class="form-control" id="businessName"
+                                    placeholder="e.g., QuickFix Services">
+                            </div>
+                            <div class="mb-3">
+                                <label for="serviceType" class="form-label">Service Category *</label>
+                                <select class="form-select" id="serviceType">
+                                    <option value="Roads">Roads & Construction</option>
+                                    <option value="Waste">Waste Management</option>
+                                    <option value="Electrical">Electrical / Street Lights</option>
+                                    <option value="Plumbing">Plumbing / Water</option>
+                                    <option value="Other">Other Services</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <!-- Role is always citizen for public registration -->
-                    <input type="hidden" id="registerRole" value="citizen">
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="registerEmail" required
+                                placeholder="name@example.com">
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="registerPassword" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="registerPassword" required
-                            placeholder="********">
-                    </div>
+                        <!-- Role is always citizen for public registration -->
+                        <input type="hidden" id="registerRole" value="citizen">
 
-                    <div class="mb-3">
-                        <label for="registerConfirmPassword" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="registerConfirmPassword" required
-                            placeholder="********">
-                    </div>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" required
+                                placeholder="********">
+                        </div>
 
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" value="" id="invalidCheck" required>
-                        <label class="form-check-label small" for="invalidCheck">
-                            I agree to the terms and conditions.
-                        </label>
-                    </div>
+                        <div class="mb-3">
+                            <label for="registerConfirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="registerConfirmPassword" required
+                                placeholder="********">
+                        </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2">Register</button>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value="" id="invalidCheck" required>
+                            <label class="form-check-label small" for="invalidCheck">
+                                I agree to the terms and conditions.
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">Register</button>
                 </form>
                 <div class="mt-3 text-center">
                     <p>Already have an account? <a href="login.html">Login here</a></p>

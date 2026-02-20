@@ -95,27 +95,61 @@
         </div>
     </div>
 
-    <!-- Assign Modal -->
-    <div class="modal fade" id="assignModal" tabindex="-1">
+    <!-- Dispatcher Modal -->
+    <div class="modal fade" id="dispatchModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Assign Complaint</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Complaint Dispatcher Control</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="assignForm">
-                        <input type="hidden" id="assignComplaintId">
-                        <div class="mb-3">
-                            <label for="officerSelect" class="form-label">Select Officer</label>
-                            <select class="form-select" id="officerSelect" required>
-                                <option value="">Choose...</option>
-                                <option value="Officer Raj">Officer Raj (Roads)</option>
-                                <option value="Officer Priya">Officer Priya (Sanitation)</option>
-                                <option value="Officer Amit">Officer Amit (Electrical)</option>
-                            </select>
+                <div class="modal-body p-4">
+                    <form id="dispatchForm">
+                        <input type="hidden" id="dispatchComplaintId">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Resolution Path</label>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="resolutionType" id="resGov"
+                                        value="government" checked>
+                                    <label class="btn btn-outline-primary w-100 p-3" for="resGov">
+                                        <i class="fas fa-university d-block fs-3 mb-2"></i>
+                                        Government
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="resolutionType" id="resPrivate"
+                                        value="private">
+                                    <label class="btn btn-outline-info w-100 p-3" for="resPrivate">
+                                        <i class="fas fa-shopping-cart d-block fs-3 mb-2"></i>
+                                        Private
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" data-action="assign-officer">Assign</button>
+
+                        <div id="govDispatchFields">
+                            <div class="mb-3">
+                                <label for="officerSelect" class="form-label">Assign to Officer</label>
+                                <select class="form-select" id="officerSelect">
+                                    <option value="">Choosing...</option>
+                                    <option value="2">Officer Raj (Roads)</option>
+                                    <option value="3">Officer Priya (Sanitation)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="privateDispatchFields" style="display: none;">
+                            <div class="alert alert-info py-2 small">
+                                <i class="fas fa-info-circle me-2"></i> This will publish the job to the private vendor
+                                marketplace for bidding.
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-dark btn-lg">Dispatch Request</button>
+                        </div>
                     </form>
                 </div>
             </div>

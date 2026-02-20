@@ -68,7 +68,9 @@ export function renderNavbar() {
 export function getStatusBadge(status) {
     switch (status) {
         case 'Pending': return '<span class="badge bg-warning text-dark">Pending</span>';
-        case 'In Progress': return '<span class="badge bg-info text-dark">In Progress</span>';
+        case 'Routed': return '<span class="badge bg-secondary">Routed</span>';
+        case 'Awaiting Quotes': return '<span class="badge bg-info text-dark">Awaiting Quotes</span>';
+        case 'In Progress': return '<span class="badge bg-primary">In Progress</span>';
         case 'Resolved': return '<span class="badge bg-success">Resolved</span>';
         default: return '<span class="badge bg-secondary">Unknown</span>';
     }

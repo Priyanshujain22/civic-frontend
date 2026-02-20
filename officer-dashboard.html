@@ -48,8 +48,12 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Resolution Notes</label>
-                            <textarea class="form-control" id="updateNotes" rows="3"
+                            <label class="form-label">Completion Proof (Optional)</label>
+                            <input type="file" class="form-control" id="updateProof" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Resolution Notes *</label>
+                            <textarea class="form-control" id="updateNotes" rows="3" required
                                 placeholder="Describe action taken..."></textarea>
                         </div>
                         <button type="submit" class="btn btn-success w-100" data-action="update-status">Update
