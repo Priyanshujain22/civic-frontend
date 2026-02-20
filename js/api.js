@@ -97,6 +97,21 @@ export async function fetchComplaints() {
     }
 }
 
+export async function createComplaint(complaintData) {
+    try {
+        const response = await fetch(`${API_URL}/complaints`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify(complaintData)
+        });
+        const result = await response.json();
+        return result.success ? { success: true, data: result.data } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Create Complaint Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
+
 // --- Hybrid Dispatcher APIs ---
 
 export async function routeToGovernment(complaint_id, officer_id) {

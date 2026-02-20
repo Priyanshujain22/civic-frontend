@@ -242,16 +242,18 @@ function initComplaintForm() {
         e.preventDefault();
 
         const complaintData = {
-            category: document.getElementById('complaintCategory').value, // Assuming value acts as name for now, or update form to have IDs
+            category: document.getElementById('complaintCategory').value,
             description: document.getElementById('complaintDescription').value,
             location: document.getElementById('complaintLocation').value,
-            // citizenName not needed, backend takes from token
+            resolution_type: document.getElementById('resolutionType').value // Get preference
         };
 
         const response = await API.createComplaint(complaintData);
         if (response.success) {
-            showAlert('Complaint Submitted!');
+            showAlert('Complaint Submitted Successfully!');
             setTimeout(() => window.location.href = 'citizen-dashboard.html', 1500);
+        } else {
+            showAlert(response.message || 'Failed to submit complaint', 'danger');
         }
     });
 }
