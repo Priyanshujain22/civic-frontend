@@ -7,18 +7,32 @@ export function renderNavbar() {
 
     let links = '';
     if (user) {
-        // CorrectRole Display Logic
-        const roleDisplay = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+        const userName = user.name || 'User';
+        const dashboardLink = user.role === 'admin' ? 'admin-dashboard.html' :
+            (user.role === 'officer' ? 'officer-dashboard.html' : 'citizen-dashboard.html');
+
         links = `
-            <li class="nav-item"><span class="nav-link text-white fw-bold">Logged in as: ${roleDisplay}</span></li>
-            <li class="nav-item"><a class="nav-link" href="profile.html"><i class="fas fa-user-circle me-1"></i>Profile</a></li>
-            <li class="nav-item"><a class="nav-link" href="#" id="logoutBtn">Logout</a></li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle fw-bold text-white px-3" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-2"></i>${userName}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2 animate slideIn" aria-labelledby="profileDropdown" style="min-width: 200px; border-radius: 12px;">
+                    <li class="px-3 py-2 border-bottom mb-2 bg-light">
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Your Account</small>
+                    </li>
+                    <li><a class="dropdown-item py-2" href="profile.html"><i class="fas fa-user-edit me-2 text-primary"></i>My Profile</a></li>
+                    <li><a class="dropdown-item py-2" href="${dashboardLink}"><i class="fas fa-list-alt me-2 text-success"></i>My Dashboard</a></li>
+                    ${user.role === 'citizen' ? '<li><a class="dropdown-item py-2" href="complaint-form.html"><i class="fas fa-plus-circle me-2 text-info"></i>New Complaint</a></li>' : ''}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2 text-danger" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </li>
         `;
     } else {
         links = `
             <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-            <li class="nav-item"><a class="btn btn-light text-primary ms-2" href="register.html">Register</a></li>
+            <li class="nav-item"><a class="btn btn-light text-primary ms-2 px-4 rounded-pill fw-bold" href="register.html">Register</a></li>
         `;
     }
 
