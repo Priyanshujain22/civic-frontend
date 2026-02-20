@@ -285,9 +285,17 @@ async function initAdminDashboard() {
     // Fetch and populate officers for dispatch
     const officers = await API.fetchUsers('officer');
     const officerSelect = document.getElementById('officerSelect');
-    if (officerSelect && officers.length) {
+    if (officerSelect) {
         officerSelect.innerHTML = '<option value="">Select Officer...</option>' +
             officers.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+    }
+
+    // Fetch and populate vendors for dispatch
+    const vendors = await API.fetchUsers('vendor');
+    const vendorSelect = document.getElementById('vendorSelect');
+    if (vendorSelect) {
+        vendorSelect.innerHTML = '<option value="">Select Vendor...</option>' +
+            vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
     }
 
     // Stats
@@ -329,12 +337,21 @@ async function initAdminDashboard() {
         }
     });
 
-    // Toggle dispatch fields
+    // Toggle dispatch fields (Government vs Private)
     document.querySelectorAll('input[name="resolutionType"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             const isPrivate = e.target.value === 'private';
             document.getElementById('govDispatchFields').style.display = isPrivate ? 'none' : 'block';
             document.getElementById('privateDispatchFields').style.display = isPrivate ? 'block' : 'none';
+        });
+    });
+
+    // Toggle private method (Marketplace vs Direct)
+    document.querySelectorAll('input[name="privateMethod"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const isDirect = e.target.value === 'direct';
+            document.getElementById('marketplaceInfo').style.display = isDirect ? 'none' : 'block';
+            document.getElementById('directVendorSelect').style.display = isDirect ? 'block' : 'none';
         });
     });
 
@@ -346,7 +363,14 @@ async function initAdminDashboard() {
 
         let response;
         if (resType === 'private') {
-            response = await API.routeToPrivate(id);
+            const privateMethod = document.querySelector('input[name="privateMethod"]:checked').value;
+            if (privateMethod === 'direct') {
+                const vendorId = document.getElementById('vendorSelect').value;
+                if (!vendorId) return showAlert('Please select a vendor', 'danger');
+                response = await API.routeToVendor(id, vendorId);
+            } else {
+                response = await API.routeToPrivate(id);
+            }
         } else {
             const officerId = document.getElementById('officerSelect').value;
             if (!officerId) return showAlert('Please select an officer', 'danger');

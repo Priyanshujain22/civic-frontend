@@ -142,9 +142,31 @@
                         </div>
 
                         <div id="privateDispatchFields" style="display: none;">
-                            <div class="alert alert-info py-2 small">
+                            <div class="mb-3">
+                                <label class="form-label d-block">Private Resolution Method</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="privateMethod" id="methodMarket"
+                                        value="market" checked>
+                                    <label class="form-check-label" for="methodMarket">Marketplace (Bidding)</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="privateMethod" id="methodDirect"
+                                        value="direct">
+                                    <label class="form-check-label" for="methodDirect">Direct Assignment</label>
+                                </div>
+                            </div>
+
+                            <div id="marketplaceInfo" class="alert alert-info py-2 small">
                                 <i class="fas fa-info-circle me-2"></i> This will publish the job to the private vendor
                                 marketplace for bidding.
+                            </div>
+
+                            <div id="directVendorSelect" class="mb-3" style="display: none;">
+                                <label for="vendorSelect" class="form-label">Select Vendor</label>
+                                <select class="form-select" id="vendorSelect">
+                                    <option value="">Choosing...</option>
+                                    <!-- Populated via JS -->
+                                </select>
                             </div>
                         </div>
 

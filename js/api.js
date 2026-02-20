@@ -145,6 +145,21 @@ export async function routeToPrivate(complaint_id) {
     }
 }
 
+export async function routeToVendor(complaint_id, vendor_id) {
+    try {
+        const response = await fetch(`${API_URL}/admin/route/vendor`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ complaint_id, vendor_id })
+        });
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Route Vendor Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
+
 // --- Vendor & Marketplace APIs ---
 
 export async function submitQuote(complaint_id, price, estimated_time) {
