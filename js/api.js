@@ -90,10 +90,11 @@ export async function fetchComplaints() {
         });
 
         const result = await response.json();
-        return result.success ? result.data : [];
+        if (!response.ok) return { success: false, message: result.message || 'Server error' };
+        return { success: true, data: result.success ? result.data : [] };
     } catch (error) {
         console.error('Fetch Complaints Error:', error);
-        return [];
+        return { success: false, message: 'Network error ' + error.message };
     }
 }
 

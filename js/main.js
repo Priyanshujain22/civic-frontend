@@ -120,9 +120,17 @@ function initRegister() {
 
 async function initCitizenDashboard() {
     // Role check already done by checkRoleAccess
-    const complaints = await API.fetchComplaints();
+    const response = await API.fetchComplaints();
+    const complaints = response.data || [];
     const tableBody = document.getElementById('complaintTableBody');
     const noData = document.getElementById('noData');
+
+    if (!response.success && !response.data) {
+        showAlert('Error loading complaints: ' + (response.message || 'Unknown error'), 'danger');
+        noData.innerHTML = `<p class="text-danger">Failed to load data. Please <a href="login.html">login again</a>.</p>`;
+        noData.classList.remove('d-none');
+        return;
+    }
 
     // Filter to show only OWN complaints (simulated for now by name or ID if available, otherwise show all for demo)
     // For RBAC demo: Citizens should only see their own.
