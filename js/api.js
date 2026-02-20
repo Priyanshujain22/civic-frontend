@@ -171,4 +171,18 @@ export async function updateUserProfile(userData) {
         console.error('Update Profile Error:', error);
         return { success: false, message: 'Network error' };
     }
+} export async function requestPasswordReset(email) {
+    try {
+        const response = await fetch(`${API_URL}/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Password Reset Error:', error);
+        return { success: false, message: 'Network error' };
+    }
 }
