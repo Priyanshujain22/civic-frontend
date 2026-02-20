@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (path.includes('complaint-form.html')) checkRoleAccess('citizen', initComplaintForm);
     else if (path.includes('admin-dashboard.html')) checkRoleAccess('admin', initAdminDashboard);
     else if (path.includes('officer-dashboard.html')) checkRoleAccess('officer', initOfficerDashboard);
+    else if (path.includes('profile.html')) initProfilePage();
 });
 
 // Access Control Helper
@@ -302,6 +303,65 @@ async function initOfficerDashboard() {
         if (response.success) {
             showAlert('Status Updated');
             setTimeout(() => location.reload(), 1000);
+        }
+    });
+}
+async function initProfilePage() {
+    const user = API.getCurrentUser();
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const nameInput = document.getElementById('profileName');
+    const emailInput = document.getElementById('profileEmail');
+    const phoneInput = document.getElementById('profilePhone');
+    const roleInput = document.getElementById('profileRole');
+    const roleHeader = document.getElementById('profileRoleHeader');
+    const backBtn = document.getElementById('backToDashboard');
+
+    // Populate with cached data first
+    nameInput.value = user.name || '';
+    emailInput.value = user.email || '';
+    roleInput.value = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
+    roleHeader.innerText = roleInput.value;
+
+    // Fetch fresh profile data to get phone
+    const fullProfile = await API.fetchUserProfile();
+    if (fullProfile) {
+        nameInput.value = fullProfile.name || '';
+        phoneInput.value = fullProfile.phone || '';
+        // Update local storage if name changed
+        if (fullProfile.name !== user.name) {
+            const updatedUser = { ...user, name: fullProfile.name };
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        }
+    }
+
+    // Back to dashboard logic
+    backBtn.addEventListener('click', () => {
+        if (user.role === 'citizen') window.location.href = 'citizen-dashboard.html';
+        else if (user.role === 'admin') window.location.href = 'admin-dashboard.html';
+        else if (user.role === 'officer') window.location.href = 'officer-dashboard.html';
+    });
+
+    const form = document.getElementById('profileForm');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userData = {
+            name: nameInput.value,
+            phone: phoneInput.value
+        };
+
+        const response = await API.updateUserProfile(userData);
+        if (response.success) {
+            showAlert('Profile updated successfully!');
+            // Update local storage
+            const updatedUser = { ...user, name: userData.name };
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert(response.message || 'Failed to update profile', 'danger');
         }
     });
 }

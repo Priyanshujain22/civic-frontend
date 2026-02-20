@@ -11,6 +11,7 @@ export function renderNavbar() {
         const roleDisplay = user.role.charAt(0).toUpperCase() + user.role.slice(1);
         links = `
             <li class="nav-item"><span class="nav-link text-white fw-bold">Logged in as: ${roleDisplay}</span></li>
+            <li class="nav-item"><a class="nav-link" href="profile.html"><i class="fas fa-user-circle me-1"></i>Profile</a></li>
             <li class="nav-item"><a class="nav-link" href="#" id="logoutBtn">Logout</a></li>
         `;
     } else {

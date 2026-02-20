@@ -140,3 +140,32 @@ export async function assignOfficer(complaintId, officerId) {
         return { success: false, message: 'Network error' };
     }
 }
+export async function fetchUserProfile() {
+    try {
+        const response = await fetch(`${API_URL}/auth/profile`, {
+            headers: getAuthHeader()
+        });
+
+        const result = await response.json();
+        return result.success ? result.data : null;
+    } catch (error) {
+        console.error('Fetch Profile Error:', error);
+        return null;
+    }
+}
+
+export async function updateUserProfile(userData) {
+    try {
+        const response = await fetch(`${API_URL}/auth/profile/update`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify(userData)
+        });
+
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Update Profile Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
