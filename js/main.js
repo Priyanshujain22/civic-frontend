@@ -282,22 +282,6 @@ async function initAdminDashboard() {
     }
     const complaints = response.data || [];
 
-    // Fetch and populate officers for dispatch
-    const officers = await API.fetchUsers('officer');
-    const officerSelect = document.getElementById('officerSelect');
-    if (officerSelect) {
-        officerSelect.innerHTML = '<option value="">Select Officer...</option>' +
-            officers.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
-    }
-
-    // Fetch and populate vendors for dispatch
-    const vendors = await API.fetchUsers('vendor');
-    const vendorSelect = document.getElementById('vendorSelect');
-    if (vendorSelect) {
-        vendorSelect.innerHTML = '<option value="">Select Vendor...</option>' +
-            vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
-    }
-
     // Stats
     document.getElementById('totalStats').innerText = complaints.length;
     document.getElementById('pendingStats').innerText = complaints.filter(c => c.status === 'Pending').length;
@@ -329,10 +313,33 @@ async function initAdminDashboard() {
     `).join('');
 
     // Event delegation for Dispatch buttons
-    tableBody.addEventListener('click', (e) => {
+    tableBody.addEventListener('click', async (e) => {
         const btn = e.target.closest('button[data-action="dispatch"]');
         if (btn) {
-            document.getElementById('dispatchComplaintId').value = btn.dataset.id;
+            const complaintId = btn.dataset.id;
+            const complaint = complaints.find(c => c.id == complaintId);
+            const category = complaint ? complaint.category_name : null;
+
+            document.getElementById('dispatchComplaintId').value = complaintId;
+
+            // Populate filtered lists
+            const [officers, vendors] = await Promise.all([
+                API.fetchUsers('officer', category),
+                API.fetchUsers('vendor', category)
+            ]);
+
+            const officerSelect = document.getElementById('officerSelect');
+            if (officerSelect) {
+                officerSelect.innerHTML = '<option value="">Select Officer...</option>' +
+                    officers.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+            }
+
+            const vendorSelect = document.getElementById('vendorSelect');
+            if (vendorSelect) {
+                vendorSelect.innerHTML = '<option value="">Select Vendor...</option>' +
+                    vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+            }
+
             new bootstrap.Modal(document.getElementById('dispatchModal')).show();
         }
     });
@@ -664,8 +671,8 @@ function renderActiveJobs(jobs, container) {
                     <h5 class="fw-bold">Job #${job.complaint_id}</h5>
                     <p class="text-muted">${job.description}</p>
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-success fw-bold">Accepted: ₹${job.price}</span>
-                        <button class="btn btn-sm btn-success rounded-pill btn-complete" data-id="${job.complaint_id}">
+                        <span class="text-success fw-bold">${job.price ? `Accepted: ₹${job.price}` : 'Direct Assignment'}</span>
+                        <button class="btn btn-sm btn-success rounded-pill btn-complete" data-id="${job.id || job.complaint_id}">
                             Mark Completed
                         </button>
                     </div>

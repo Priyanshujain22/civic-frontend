@@ -220,10 +220,14 @@ export async function verifyVendor(vendor_id) {
     }
 }
 
-export async function fetchUsers(role = null) {
+export async function fetchUsers(role = null, category = null) {
     try {
         let url = `${API_URL}/admin/users`;
-        if (role) url += `?role=${role}`;
+        let params = [];
+        if (role) params.push(`role=${role}`);
+        if (category) params.push(`category=${encodeURIComponent(category)}`);
+        if (params.length > 0) url += `?${params.join('&')}`;
+
         const response = await fetch(url, { headers: getAuthHeader() });
         const result = await response.json();
         return result.success ? result.data : [];
