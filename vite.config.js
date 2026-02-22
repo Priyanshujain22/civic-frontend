@@ -14,6 +14,7 @@ export default defineConfig({
                 complaintForm: resolve(__dirname, 'complaint-form.html'),
                 profile: resolve(__dirname, 'profile.html'),
                 forgotPassword: resolve(__dirname, 'forgot-password.html'),
+                vendorDashboard: resolve(__dirname, 'vendor-dashboard.html'),
             }
         }
     }

@@ -9,7 +9,8 @@ export function renderNavbar() {
     if (user) {
         const userName = user.name || 'User';
         const dashboardLink = user.role === 'admin' ? 'admin-dashboard.html' :
-            (user.role === 'officer' ? 'officer-dashboard.html' : 'citizen-dashboard.html');
+            (user.role === 'officer' ? 'officer-dashboard.html' :
+                (user.role === 'vendor' ? 'vendor-dashboard.html' : 'citizen-dashboard.html'));
 
         links = `
             <li class="nav-item dropdown">

@@ -347,11 +347,14 @@ async function initAdminDashboard() {
             users.forEach(v => {
                 const opt = document.createElement('option');
                 opt.value = v.id;
-                opt.textContent = `${v.name} (${v.business_name || 'Vendor'})`;
+                // Use business_name if available, otherwise just name
+                const displayName = v.business_name ? `${v.business_name} (${v.name})` : v.name;
+                opt.textContent = `${displayName} - ${v.service_type || 'General'}`;
                 vendorSelect.appendChild(opt);
             });
         } else {
-            vendorSelect.innerHTML = '<option value="">No vendors found for this category</option>';
+            console.log(`No vendors found for category: ${category}`);
+            vendorSelect.innerHTML = '<option value="">No vendors found (Check backend restart)</option>';
         }
     }
 
@@ -616,13 +619,16 @@ async function initVendorDashboard() {
     const quoteForm = document.getElementById('quoteForm');
 
     const loadData = async () => {
-        const response = await API.fetchComplaints();
-        const complaints = response.data || [];
-        renderAvailableJobs(complaints, jobsList);
+        // 1. Available marketplace jobs
+        const response = await fetch(`${API.API_URL}/vendor/available`, {
+            headers: API.getAuthHeader()
+        }).then(r => r.json());
 
-        // Fetch specific vendor data for quotes and active jobs
-        // const myQuotes = await API.fetchComplaints(); 
-        // Actually vendor_routes has /my-jobs
+        if (response.success) {
+            renderAvailableJobs(response.data, jobsList);
+        }
+
+        // 2. Active jobs (assigned specifically to this vendor)
         const activeJobs = await fetch(`${API.API_URL}/vendor/my-jobs`, {
             headers: API.getAuthHeader()
         }).then(r => r.json());
