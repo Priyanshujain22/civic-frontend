@@ -24,7 +24,7 @@ body {
   background-color: var(--primary-color) !important;
 }
 
-.navbar-brand, .nav-link {
+.navbar-brand, .navbar .nav-link {
   color: var(--white) !important;
 }
 
