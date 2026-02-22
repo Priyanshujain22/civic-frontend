@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <!-- View Modal (Ideally could be dynamic or shared, keeping simple for now) -->
+    <!-- View Modal -->
     <div class="modal fade" id="viewModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -85,6 +85,46 @@
                         <label class="fw-bold text-success"><i class="fas fa-comment-check me-1"></i> Officer Resolution
                             Notes:</label>
                         <p id="viewResolutionNotes" class="mb-0 italic"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quotes Modal -->
+    <div class="modal fade" id="quotesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice-dollar me-2"></i> Vendor Quotations</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="quotesLoading" class="text-center py-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Fetching latest quotes...</p>
+                    </div>
+                    <div id="noQuotes" class="text-center py-4 d-none">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No vendors have submitted quotes for this job yet.</p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="quotesTable" style="display: none;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Vendor</th>
+                                    <th>Price Quote</th>
+                                    <th>Est. Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quotesTableBody">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div class="modal-footer">
