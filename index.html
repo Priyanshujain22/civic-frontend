@@ -18,45 +18,64 @@
     <!-- Navbar injected via JS -->
 
     <!-- Hero Section -->
-    <header class="hero-section">
-        <div class="container">
-            <h1 class="hero-heading">Report Civic Issues Easily & Track Their Resolution</h1>
-            <p class="lead mb-4">Empowering citizens to build a better community together.</p>
-            <a href="login.html" id="heroRaiseBtn" class="btn btn-warning btn-lg me-2">Raise a Complaint</a>
-            <a href="#process" class="btn btn-outline-light btn-lg">How it Works</a>
+    <header class="hero-section position-relative">
+        <div class="container position-relative" style="z-index: 2;">
+            <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill fw-bold animate slideIn">SMART CITIES
+                INITIATIVE</span>
+            <h1 class="hero-heading animate slideIn" style="animation-delay: 0.1s;">Report Civic Issues Easily <br>&
+                Track Their Resolution</h1>
+            <p class="hero-subtitle mb-5 animate slideIn" style="animation-delay: 0.2s;">Empowering citizens to build a
+                seamless, safe, and beautiful community together. Real-time updates at your fingertips.</p>
+            <div class="animate slideIn" style="animation-delay: 0.3s;">
+                <a href="login.html" id="heroRaiseBtn" class="btn btn-modern btn-modern-primary me-3"><i
+                        class="fas fa-bullhorn me-2"></i>Raise a Complaint</a>
+                <a href="#process" class="btn btn-modern btn-outline-light"><i class="fas fa-play-circle me-2"></i>How
+                    it Works</a>
+            </div>
+        </div>
+        <!-- Decorative subtle overlay for depth -->
+        <div class="position-absolute top-0 end-0 bottom-0 start-0"
+            style="background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); z-index: 1;">
         </div>
     </header>
 
     <!-- 3-Step Working Section -->
-    <section id="process" class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-5 text-primary">How It Works</h2>
-            <div class="row text-center">
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 p-4">
-                        <div class="display-4 text-primary mb-3">
+    <section id="process" class="py-5" style="background-color: var(--white);">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <span class="text-uppercase text-info fw-bold tracking-wide">Simple Process</span>
+                <h2 class="display-5 gradient-text mt-2 mb-3">How It Works</h2>
+                <div class="mx-auto bg-primary rounded" style="width: 60px; height: 4px;"></div>
+            </div>
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="card modern-card h-100 p-4">
+                        <div class="feature-icon-wrapper">
                             <i class="fas fa-edit"></i>
                         </div>
-                        <h3>1. Report</h3>
-                        <p>Submit your complaint with details, location, and photos.</p>
+                        <h4 class="fw-bold mb-3">1. Report</h4>
+                        <p class="text-muted mb-0">Submit your complaint with detailed descriptions, exact GPS
+                            locations, and high-quality photo evidence.</p>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 p-4">
-                        <div class="display-4 text-primary mb-3">
+                <div class="col-md-4">
+                    <div class="card modern-card h-100 p-4">
+                        <div class="feature-icon-wrapper">
                             <i class="fas fa-user-shield"></i>
                         </div>
-                        <h3>2. Assign</h3>
-                        <p>Authorities review and assign the issue to the concerned officer.</p>
+                        <h4 class="fw-bold mb-3">2. Assign</h4>
+                        <p class="text-muted mb-0">Our automated system routes your issue directly to the concerned
+                            government officer or verified local vendor.</p>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 p-4">
-                        <div class="display-4 text-primary mb-3">
+                <div class="col-md-4">
+                    <div class="card modern-card h-100 p-4">
+                        <div class="feature-icon-wrapper">
                             <i class="fas fa-check-circle"></i>
                         </div>
-                        <h3>3. Resolve</h3>
-                        <p>Track progress and get notified when the issue is resolved.</p>
+                        <h4 class="fw-bold mb-3">3. Resolve</h4>
+                        <p class="text-muted mb-0">Track real-time progress right from your dashboard. We'll notify you
+                            the moment the issue is fixed!</p>
                     </div>
                 </div>
             </div>
@@ -65,23 +84,43 @@
 
     <!-- About Section -->
     <section id="about" class="py-5 bg-light">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h2 class="text-primary mb-4">About the System</h2>
-                    <p class="lead">Bridging the gap between citizens and administration.</p>
-                    <p>Our goal is to provide a transparent and efficient platform for citizens to report civic issues
-                        such as road damage, garbage accumulation, street light failures, and more. Authorities can
-                        manage, assign, and resolve these complaints in real-time.</p>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success me-2"></i> Real-time tracking</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Transparency in administration</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Direct communication channel</li>
+        <div class="container py-4">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <span class="text-uppercase text-info fw-bold tracking-wide">Our Mission</span>
+                    <h2 class="display-5 gradient-text mt-2 mb-4">About the System</h2>
+                    <p class="lead text-dark fw-normal mb-4">Bridging the gap between active citizens and effective
+                        municipal administration.</p>
+                    <p class="text-muted mb-4">Our goal is to provide a fully transparent, hyper-efficient platform for
+                        citizens to report critical civic issues. From road damages to broken streetlights, authorities
+                        can now seamlessly manage, instantly route, and securely resolve community complaints in
+                        real-time.</p>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3 d-flex align-items-center">
+                            <div class="bg-success rounded-circle text-white d-inline-flex me-3 p-1"><i
+                                    class="fas fa-check small"></i></div> <span class="fw-medium">Real-time resolution
+                                GPS tracking</span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <div class="bg-success rounded-circle text-white d-inline-flex me-3 p-1"><i
+                                    class="fas fa-check small"></i></div> <span class="fw-medium">100% Transparency in
+                                administration</span>
+                        </li>
+                        <li class="mb-0 d-flex align-items-center">
+                            <div class="bg-success rounded-circle text-white d-inline-flex me-3 p-1"><i
+                                    class="fas fa-check small"></i></div> <span class="fw-medium">Direct communication
+                                channel to vendors</span>
+                        </li>
                     </ul>
                 </div>
-                <div class="col-md-6 text-center">
-                    <img src="https://source.unsplash.com/600x400/?community,help" alt="Community"
-                        class="img-fluid rounded shadow">
+                <div class="col-lg-6 position-relative">
+                    <!-- Decorative blob behind image -->
+                    <div class="position-absolute rounded-circle bg-info opacity-25"
+                        style="width: 300px; height: 300px; bottom: -20px; right: -20px; z-index: 0; filter: blur(40px);">
+                    </div>
+                    <img src="assets/community_hero.jpg" alt="Community Solving Challenges"
+                        class="img-fluid rounded-4 shadow-lg position-relative"
+                        style="z-index: 1; border: 8px solid white;">
                 </div>
             </div>
         </div>

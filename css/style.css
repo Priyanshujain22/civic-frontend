@@ -1,7 +1,8 @@
 /* Civic Complaint Management System Styles */
 
 :root {
-  --primary-color: #004085; /* Government Blue */
+  --primary-color: #004085;
+  /* Government Blue */
   --secondary-color: #6c757d;
   --success-color: #28a745;
   --info-color: #17a2b8;
@@ -20,11 +21,12 @@ body {
 
 /* Navbar */
 .navbar {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: var(--primary-color) !important;
 }
 
-.navbar-brand, .navbar .nav-link {
+.navbar-brand,
+.navbar .nav-link {
   color: var(--white) !important;
 }
 
@@ -52,7 +54,7 @@ body {
 .card {
   border: none;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
 }
 
@@ -62,7 +64,7 @@ body {
 
 .card-header {
   background-color: var(--white);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-weight: 600;
 }
 
@@ -110,61 +112,152 @@ footer {
 
 /* Dropdown Animation & Styles */
 .dropdown-menu {
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
-    transition: all 0.3s ease;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease;
 }
 
 .dropdown-item {
-    font-size: 0.95rem;
-    transition: background 0.2s ease, padding 0.2s ease;
+  font-size: 0.95rem;
+  transition: background 0.2s ease, padding 0.2s ease;
 }
 
 .dropdown-item:hover {
-    background-color: #f8f9fa;
-    color: var(--primary-color);
-    padding-left: 1.5rem;
+  background-color: #f8f9fa;
+  color: var(--primary-color);
+  padding-left: 1.5rem;
 }
 
 .dropdown-toggle::after {
-    transition: transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .dropdown.show .dropdown-toggle::after {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Micro-animations */
 @keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate.slideIn {
-    animation: slideIn 0.3s ease-out forwards;
+  animation: slideIn 0.3s ease-out forwards;
 }
 
 /* Premium Navbar Look */
 .navbar-brand {
-    font-weight: 700;
-    letter-spacing: -0.5px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .nav-link.dropdown-toggle {
-    display: flex;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.1);
-    margin-left: 10px;
-    border-radius: 8px;
-    transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  margin-left: 10px;
+  border-radius: 8px;
+  transition: background 0.2s;
 }
 
 .nav-link.dropdown-toggle:hover {
-    background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Modern Landing Page Additions */
+.hero-section {
+  background: linear-gradient(135deg, rgba(0, 64, 133, 0.9) 0%, rgba(23, 162, 184, 0.8) 100%), url('https://source.unsplash.com/1600x900/?city,infrastructure');
+  background-size: cover;
+  background-position: center;
+  color: var(--white);
+  padding: 140px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-heading {
+  font-weight: 800;
+  font-size: 3.5rem;
+  letter-spacing: -1px;
+  margin-bottom: 24px;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 300;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.feature-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  background: rgba(23, 162, 184, 0.1);
+  color: var(--primary-color);
+  font-size: 2rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover .feature-icon-wrapper {
+  background: var(--primary-color);
+  color: var(--white);
+  transform: scale(1.1);
+}
+
+.modern-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.btn-modern {
+  border-radius: 30px;
+  padding: 12px 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.btn-modern-primary {
+  background: linear-gradient(45deg, #ffc107, #ff9800);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+
+.btn-modern-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+  color: #fff;
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, var(--primary-color), var(--info-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
 }
