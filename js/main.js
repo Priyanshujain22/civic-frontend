@@ -2,6 +2,15 @@
 import { renderNavbar, getStatusBadge, showAlert } from './ui.js';
 import * as API from './api.js';
 
+async function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
 // Initialize UI
 document.addEventListener('DOMContentLoaded', async () => {
     renderNavbar();
@@ -198,6 +207,11 @@ function renderComplaints(complaints) {
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td><span class="badge bg-success rounded-pill px-3">Resolved</span> ${c.payment_status === 'paid' ? '<i class="fas fa-check-circle text-success ms-1" title="Paid"></i>' : ''}</td>
             <td>
+                <button class="btn btn-sm btn-outline-info rounded-pill px-3" data-action="view" data-id="${c.id}">
+                    <i class="fas fa-info-circle me-1"></i> Details
+                </button>
+            </td>
+            <td>
                 ${c.user_rating ? `
                     <div class="text-warning small">
                         ${[1, 2, 3, 4, 5].map(i => `<i class="${i <= c.user_rating ? 'fas' : 'far'} fa-star"></i>`).join('')}
@@ -251,12 +265,24 @@ function showComplaintDetails(complaint) {
     document.getElementById('viewLocation').innerHTML = `<i class="fas fa-map-marker-alt text-danger me-2"></i> ${complaint.location}`;
     document.getElementById('viewStatus').innerHTML = getStatusBadge(complaint.status);
 
-    const resSection = document.getElementById('resolutionSection');
-    if (complaint.status === 'Resolved' && complaint.resolution_notes) {
-        document.getElementById('viewResolutionNotes').innerText = complaint.resolution_notes;
-        resSection.classList.remove('d-none');
+    const resolutionSection = document.getElementById('resolutionSection');
+    const viewResolutionNotes = document.getElementById('viewResolutionNotes');
+    const viewResolutionImage = document.getElementById('viewResolutionImage');
+
+    if (complaint.status === 'Resolved' && (complaint.resolution_notes || complaint.resolution_image)) {
+        resolutionSection.classList.remove('d-none');
+        viewResolutionNotes.innerText = complaint.resolution_notes || 'Resolved without remarks.';
+
+        if (viewResolutionImage) {
+            if (complaint.resolution_image) {
+                viewResolutionImage.src = complaint.resolution_image;
+                viewResolutionImage.classList.remove('d-none');
+            } else {
+                viewResolutionImage.classList.add('d-none');
+            }
+        }
     } else {
-        resSection.classList.add('d-none');
+        resolutionSection.classList.add('d-none');
     }
 
     // Vendor and Price
@@ -601,11 +627,17 @@ async function initOfficerDashboard() {
         const resolution_notes = document.getElementById('updateNotes').value;
 
         let response;
+        let base64Image = null;
+        const fileInput = document.getElementById('updateProof');
+        if (fileInput && fileInput.files[0]) {
+            base64Image = await getBase64(fileInput.files[0]);
+        }
+
         if (status === 'Resolved') {
             response = await fetch(`${API.API_URL}/officer/upload-proof`, {
                 method: 'POST',
                 headers: API.getAuthHeader(),
-                body: JSON.stringify({ complaint_id: id, proof_notes: resolution_notes })
+                body: JSON.stringify({ complaint_id: id, proof_notes: resolution_notes, image_data: base64Image })
             }).then(r => r.json());
         } else {
             response = await API.updateComplaintStatus(id, status, resolution_notes);
@@ -828,15 +860,19 @@ async function initVendorDashboard() {
             const id = document.getElementById('updateComplaintId').value;
             const status = document.getElementById('updateStatus').value;
             const resolution_notes = document.getElementById('updateNotes').value;
-            const imageUrl = document.getElementById('updateProof')?.value || null;
+            let base64Image = null;
+            const fileInput = document.getElementById('updateProof');
+            if (fileInput && fileInput.files[0]) {
+                base64Image = await getBase64(fileInput.files[0]);
+            }
 
             // First update status
             const response = await API.updateComplaintStatus(id, status, resolution_notes);
 
             if (response.success) {
                 // Also post a job update so picture and description appear in the "progress box"
-                if (resolution_notes || imageUrl) {
-                    await API.postJobUpdate(id, `Status changed to ${status}: ${resolution_notes}`, imageUrl);
+                if (resolution_notes || base64Image) {
+                    await API.postJobUpdate(id, `Status changed to ${status}: ${resolution_notes}`, base64Image);
                 }
                 showAlert('Task Updated Successfully');
                 bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
