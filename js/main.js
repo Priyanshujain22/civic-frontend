@@ -167,9 +167,15 @@ function renderComplaints(complaints) {
             <td>${getStatusBadge(c.status)}</td>
             <td>
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3" data-action="view" data-id="${c.id}">
-                        <i class="fas fa-eye me-1"></i> View
-                    </button>
+                    ${c.status === 'In Progress' ? `
+                        <button class="btn btn-sm btn-primary rounded-pill px-3" data-action="view" data-id="${c.id}">
+                            <i class="fas fa-tasks me-1"></i> Track Progress
+                        </button>
+                    ` : `
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" data-action="view" data-id="${c.id}">
+                            <i class="fas fa-eye me-1"></i> View
+                        </button>
+                    `}
                     ${c.status === 'Awaiting Quotes' ? `
                         <button class="btn btn-sm btn-info text-white rounded-pill px-3" data-action="quotes" data-id="${c.id}">
                             <i class="fas fa-file-invoice-dollar me-1"></i> Quotes ${c.quote_count > 0 ? `<span class="badge bg-white text-info ms-1">${c.quote_count}</span>` : ''}
@@ -810,6 +816,25 @@ async function initVendorDashboard() {
         });
     }
 
+    if (document.getElementById('updateForm')) {
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('updateComplaintId').value;
+            const status = document.getElementById('updateStatus').value;
+            const resolution_notes = document.getElementById('updateNotes').value;
+
+            const response = await API.updateComplaintStatus(id, status, resolution_notes);
+
+            if (response.success) {
+                showAlert('Status Updated Successfully');
+                bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
+                loadData();
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        });
+    }
+
     loadData();
 }
 
@@ -857,55 +882,34 @@ function renderActiveJobs(jobs, container) {
         const isAwaitingPayment = job.status === 'Awaiting Payment';
         return `
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
+                <div class="card shadow-sm h-100 border-${job.status === 'Resolved' ? 'success' : 'warning'}">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                        <strong>#${job.id}</strong>
+                        ${API.getStatusBadge ? API.getStatusBadge(job.status) : `<span class="badge bg-secondary">${job.status}</span>`}
+                    </div>
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="fw-bold mb-0">Job #${job.id}</h5>
-                            <span class="badge ${isAwaitingPayment ? 'bg-warning text-dark' : 'bg-success text-white'} rounded-pill">
-                                ${job.status}
-                            </span>
-                        </div>
-                        <p class="text-muted small mb-2">${job.description}</p>
-                        <div class="mb-3">
-                            <small class="text-muted">Citizen: <span class="text-dark fw-bold">${job.citizen_name || 'Anonymous'}</span></small><br>
-                            <small class="text-muted">Location: <span class="text-dark">${job.location}</span></small>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-success fw-bold">₹${job.price || '0'}</span>
-                            <div class="btn-group">
-                                <button class="btn btn-sm ${isAwaitingPayment ? 'btn-outline-secondary' : 'btn-outline-info'} rounded-pill px-3 btn-progress" 
-                                        data-id="${job.id}" ${isAwaitingPayment ? 'disabled title="Awaiting citizen payment"' : ''}>
-                                    <i class="fas fa-tasks me-1"></i> Update
-                                </button>
-                                <button class="btn btn-sm btn-success rounded-pill px-3 btn-complete" 
-                                        data-id="${job.id}" ${isAwaitingPayment ? 'disabled' : ''}>
-                                    Mark Completed
-                                </button>
-                            </div>
-                        </div>
+                        <h5 class="card-title text-primary">${job.category_name}</h5>
+                        <p class="card-text text-muted small mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i> ${job.location}
+                        </p>
+                        <p class="card-text">${job.description}</p>
+                        <p class="small text-muted mb-0">Reported by: ${job.citizen_name || 'Anonymous'} on ${new Date(job.created_at).toLocaleDateString()}</p>
                         ${isAwaitingPayment ? '<p class="text-warning small mt-2 mb-0"><i class="fas fa-exclamation-triangle me-1"></i> Awaiting citizen payment before you can start.</p>' : ''}
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <button class="btn btn-primary w-100 btn-update-status" data-action="update" data-id="${job.id}" ${isAwaitingPayment ? 'disabled' : ''}>
+                            <i class="fas fa-clipboard-check me-2"></i> Update Status
+                        </button>
                     </div>
                 </div>
             </div>
         `;
     }).join('');
 
-    container.querySelectorAll('.btn-progress').forEach(btn => {
+    container.querySelectorAll('.btn-update-status').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.getElementById('progressComplaintId').value = btn.dataset.id;
-            new bootstrap.Modal(document.getElementById('progressModal')).show();
-        });
-    });
-
-    container.querySelectorAll('.btn-complete').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            if (confirm('Mark this job as completed?')) {
-                const res = await API.updateComplaintStatus(btn.dataset.id, 'Resolved');
-                if (res.success) {
-                    showAlert('Job completed!');
-                    location.reload();
-                }
-            }
+            document.getElementById('updateComplaintId').value = btn.dataset.id;
+            new bootstrap.Modal(document.getElementById('updateModal')).show();
         });
     });
 }

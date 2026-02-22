@@ -260,6 +260,21 @@ export async function postFeedback(complaintId, rating, comment = '') {
     }
 }
 
+export async function updateComplaintStatus(complaintId, status, resolution_notes = '') {
+    try {
+        const response = await fetch(`${API_URL}/complaints/${complaintId}/status`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ status, resolution_notes })
+        });
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Update Status Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
+
 export async function approveQuote(complaintId, vendor_id) {
     try {
         const response = await fetch(`${API_URL}/quotes/${complaintId}/approve`, {
