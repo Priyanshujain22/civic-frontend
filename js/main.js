@@ -189,6 +189,23 @@ async function initCitizenDashboard() {
                     resSection.classList.add('d-none');
                 }
 
+                // Vendor and Price
+                const vendorSection = document.getElementById('vendorSection');
+                const priceSection = document.getElementById('priceSection');
+                if (complaint.selected_vendor_id && complaint.vendor_name) {
+                    document.getElementById('viewVendor').innerText = complaint.vendor_name;
+                    vendorSection.classList.remove('d-none');
+                    if (complaint.agreed_price) {
+                        document.getElementById('viewPrice').innerText = `₹${complaint.agreed_price}`;
+                        priceSection.classList.remove('d-none');
+                    } else {
+                        priceSection.classList.add('d-none');
+                    }
+                } else {
+                    vendorSection.classList.add('d-none');
+                    priceSection.classList.add('d-none');
+                }
+
                 new bootstrap.Modal(document.getElementById('viewModal')).show();
             }
         } else if (action === 'quotes') {
