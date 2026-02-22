@@ -435,6 +435,7 @@ async function initAdminDashboard() {
             <td class="text-truncate" style="max-width: 200px;">${c.description}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td>${getStatusBadge(c.status)}</td>
+            <td><span class="badge ${c.resolution_type === 'private' ? 'bg-info text-dark' : 'bg-primary'}">${c.resolution_type ? c.resolution_type.charAt(0).toUpperCase() + c.resolution_type.slice(1) : 'Not Specified'}</span></td>
             <td>${c.officer_name || c.vendor_name || '<span class="text-muted">Unassigned</span>'}</td>
             <td>
                 ${c.status === 'Resolved' ? `
