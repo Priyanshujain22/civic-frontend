@@ -945,9 +945,15 @@ function renderActiveJobs(jobs, container) {
                         ${isAwaitingPayment ? '<p class="text-warning small mt-2 mb-0"><i class="fas fa-exclamation-triangle me-1"></i> Awaiting citizen payment before you can start.</p>' : ''}
                     </div>
                     <div class="card-footer bg-white border-top-0">
-                        <button class="btn btn-primary w-100 btn-update-status" data-action="update" data-id="${job.id}" ${isAwaitingPayment ? 'disabled' : ''}>
-                            <i class="fas fa-clipboard-check me-2"></i> Update Status
-                        </button>
+                        ${job.status === 'Resolved' ? `
+                            <div class="text-center text-success fw-bold py-2">
+                                <i class="fas fa-check-circle me-1"></i> Task Completed
+                            </div>
+                        ` : `
+                            <button class="btn btn-primary w-100 btn-update-status" data-action="update" data-id="${job.id}" ${isAwaitingPayment ? 'disabled' : ''}>
+                                <i class="fas fa-clipboard-check me-2"></i> Update Status
+                            </button>
+                        `}
                     </div>
                 </div>
             </div>
