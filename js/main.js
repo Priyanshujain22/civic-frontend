@@ -570,10 +570,15 @@ async function initOfficerDashboard() {
                     <p class="small text-muted">Reported by: ${task.citizen_name} on ${new Date(task.created_at).toLocaleDateString()}</p>
                 </div>
                 <div class="card-footer bg-white border-top-0">
-                    <button class="btn btn-primary w-100" data-action="update" data-id="${task.id}">
-                        <i class="fas fa-clipboard-check me-2"></i> Update Status
-                    </button>
-                    <!-- Delete button hidden for Officer -->
+                    ${task.status === 'Resolved' ? `
+                        <div class="text-center text-success fw-bold py-2">
+                            <i class="fas fa-check-circle me-1"></i> Task Completed
+                        </div>
+                    ` : `
+                        <button class="btn btn-primary w-100" data-action="update" data-id="${task.id}">
+                            <i class="fas fa-clipboard-check me-2"></i> Update Status
+                        </button>
+                    `}
                 </div>
             </div>
         </div>
