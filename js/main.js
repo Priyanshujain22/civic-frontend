@@ -172,7 +172,7 @@ function renderComplaints(complaints) {
                     </button>
                     ${c.status === 'Awaiting Quotes' ? `
                         <button class="btn btn-sm btn-info text-white rounded-pill px-3" data-action="quotes" data-id="${c.id}">
-                            <i class="fas fa-file-invoice-dollar me-1"></i> Quotes
+                            <i class="fas fa-file-invoice-dollar me-1"></i> Quotes ${c.quote_count > 0 ? `<span class="badge bg-white text-info ms-1">${c.quote_count}</span>` : ''}
                         </button>
                     ` : ''}
                     ${c.status === 'Awaiting Payment' ? `
@@ -318,7 +318,7 @@ async function loadQuotes(complaintId) {
                 <td>
                     <strong>${q.business_name || 'Vendor'}</strong>
                     <div class="small text-warning">
-                        ${q.rating ? `<i class="fas fa-star me-1"></i>${q.rating.toFixed(1)}` : '<i class="far fa-star me-1"></i>New'}
+                        ${q.rating && parseFloat(q.rating) > 0 ? `<i class="fas fa-star me-1"></i>${parseFloat(q.rating).toFixed(1)}` : '<i class="far fa-star me-1"></i>New'}
                     </div>
                 </td>
                 <td class="text-success fw-bold">₹${q.price}</td>
@@ -740,6 +740,22 @@ async function initVendorDashboard() {
 
         if (activeJobsResponse.success) {
             renderActiveJobs(activeJobsResponse.data, activeJobsList);
+        }
+
+        // 2.5 My Quotes
+        const myQuotes = await API.fetchMyQuotes();
+        if (myQuotes) {
+            quotesTableBody.innerHTML = myQuotes.length === 0
+                ? '<tr><td colspan="5" class="text-center text-muted py-4">You have not submitted any quotes yet.</td></tr>'
+                : myQuotes.map(q => `
+                    <tr>
+                        <td><strong>#${q.complaint_id}</strong></td>
+                        <td class="text-truncate" style="max-width: 200px;">${q.description || 'View Job'}</td>
+                        <td class="text-success fw-bold">₹${q.price}</td>
+                        <td>${q.estimated_time}</td>
+                        <td>${API.getStatusBadge ? API.getStatusBadge(q.status) : `<span class="badge bg-${q.status === 'Approved' ? 'success' : (q.status === 'Rejected' ? 'danger' : 'warning text-dark')}">${q.status}</span>`}</td>
+                    </tr>
+                `).join('');
         }
 
         // 3. Vendor Statistics

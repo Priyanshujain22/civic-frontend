@@ -177,6 +177,19 @@ export async function submitQuote(complaint_id, price, estimated_time) {
     }
 }
 
+export async function fetchMyQuotes() {
+    try {
+        const response = await fetch(`${API_URL}/vendor/my-quotes`, {
+            headers: getAuthHeader()
+        });
+        const result = await response.json();
+        return result.success ? result.data : [];
+    } catch (error) {
+        console.error('Fetch My Quotes Error:', error);
+        return [];
+    }
+}
+
 export async function fetchComplaintQuotes(complaintId) {
     try {
         const response = await fetch(`${API_URL}/complaints/${complaintId}/quotes`, {
