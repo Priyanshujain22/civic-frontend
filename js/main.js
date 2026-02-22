@@ -323,10 +323,10 @@ async function initAdminDashboard() {
 
             document.getElementById('dispatchComplaintId').value = complaintId;
 
-            // Populate filtered lists
+            // Populate all officers and vendors (no category filter so dropdowns are always filled)
             const [officers, vendors] = await Promise.all([
-                API.fetchUsers('officer', category),
-                API.fetchUsers('vendor', category)
+                API.fetchUsers('officer'),
+                API.fetchUsers('vendor')
             ]);
 
             const officerSelect = document.getElementById('officerSelect');
@@ -354,14 +354,7 @@ async function initAdminDashboard() {
         });
     });
 
-    // Toggle private method (Marketplace vs Direct)
-    document.querySelectorAll('input[name="privateMethod"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            const isDirect = e.target.value === 'direct';
-            document.getElementById('marketplaceInfo').style.display = isDirect ? 'none' : 'block';
-            document.getElementById('directVendorSelect').style.display = isDirect ? 'block' : 'none';
-        });
-    });
+    // Private method is always direct vendor assignment (marketplace bidding removed)
 
     // Dispatch Form Submit
     document.getElementById('dispatchForm').addEventListener('submit', async (e) => {
@@ -371,14 +364,9 @@ async function initAdminDashboard() {
 
         let response;
         if (resType === 'private') {
-            const privateMethod = document.querySelector('input[name="privateMethod"]:checked').value;
-            if (privateMethod === 'direct') {
-                const vendorId = document.getElementById('vendorSelect').value;
-                if (!vendorId) return showAlert('Please select a vendor', 'danger');
-                response = await API.routeToVendor(id, vendorId);
-            } else {
-                response = await API.routeToPrivate(id);
-            }
+            const vendorId = document.getElementById('vendorSelect').value;
+            if (!vendorId) return showAlert('Please select a vendor', 'danger');
+            response = await API.routeToVendor(id, vendorId);
         } else {
             const officerId = document.getElementById('officerSelect').value;
             if (!officerId) return showAlert('Please select an officer', 'danger');
