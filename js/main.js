@@ -277,7 +277,8 @@ async function initAdminDashboard() {
 
     const response = await API.fetchComplaints();
     if (!response.success && !response.data) {
-        showAlert('Error loading complaints: ' + (response.message || 'Unknown error'), 'danger');
+        console.error('Fetch Complaints Error Details:', response);
+        showAlert('Error loading complaints: ' + (response.message || 'Check Console'), 'danger');
         return;
     }
     const complaints = response.data || [];
@@ -331,13 +332,13 @@ async function initAdminDashboard() {
             const officerSelect = document.getElementById('officerSelect');
             if (officerSelect) {
                 officerSelect.innerHTML = '<option value="">Select Officer...</option>' +
-                    officers.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+                    officers.map(o => `<option value="${o.id}">${o.name} (${o.department || 'General'})</option>`).join('');
             }
 
             const vendorSelect = document.getElementById('vendorSelect');
             if (vendorSelect) {
                 vendorSelect.innerHTML = '<option value="">Select Vendor...</option>' +
-                    vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+                    vendors.map(v => `<option value="${v.id}">${v.name} (${v.service_type || 'Private'})</option>`).join('');
             }
 
             new bootstrap.Modal(document.getElementById('dispatchModal')).show();
