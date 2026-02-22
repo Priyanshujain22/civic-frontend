@@ -192,9 +192,16 @@ function renderComplaints(complaints) {
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td><span class="badge bg-success rounded-pill px-3">Resolved</span> ${c.payment_status === 'paid' ? '<i class="fas fa-check-circle text-success ms-1" title="Paid"></i>' : ''}</td>
             <td>
-                <button class="btn btn-sm btn-outline-success rounded-pill px-3" data-action="feedback" data-id="${c.id}">
-                    <i class="fas fa-star me-1"></i> Rate Vendor
-                </button>
+                ${c.user_rating ? `
+                    <div class="text-warning small">
+                        ${[1, 2, 3, 4, 5].map(i => `<i class="${i <= c.user_rating ? 'fas' : 'far'} fa-star"></i>`).join('')}
+                    </div>
+                    <small class="text-muted">Rating submitted</small>
+                ` : `
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-3" data-action="feedback" data-id="${c.id}">
+                        <i class="fas fa-star me-1"></i> Rate Vendor
+                    </button>
+                `}
             </td>
         </tr>
     `).join('');
@@ -726,14 +733,25 @@ async function initVendorDashboard() {
             renderAvailableJobs(response.data, jobsList);
         }
 
-        // 2. Active jobs (assigned specifically to this vendor)
-        const activeJobs = await fetch(`${API.API_URL}/vendor/my-jobs`, {
+        // 2. My Active/Assigned jobs
+        const activeJobsResponse = await fetch(`${API.API_URL}/vendor/my-jobs`, {
             headers: API.getAuthHeader()
         }).then(r => r.json());
 
-        if (activeJobs.success) {
-            renderActiveJobs(activeJobs.data, activeJobsList);
-            document.getElementById('activeBidsCount').innerText = activeJobs.data.length;
+        if (activeJobsResponse.success) {
+            renderActiveJobs(activeJobsResponse.data, activeJobsList);
+        }
+
+        // 3. Vendor Statistics
+        const statsResponse = await fetch(`${API.API_URL}/vendor/stats`, {
+            headers: API.getAuthHeader()
+        }).then(r => r.json());
+
+        if (statsResponse.success) {
+            const stats = statsResponse.data;
+            document.getElementById('activeBidsCount').innerText = stats.active_bids;
+            document.getElementById('completedJobsCount').innerText = stats.completed_jobs;
+            document.getElementById('totalEarnings').innerText = `₹${stats.total_earnings.toLocaleString()}`;
         }
     };
 
@@ -814,27 +832,47 @@ function renderAvailableJobs(jobs, container) {
 
 function renderActiveJobs(jobs, container) {
     if (!container) return;
-    container.innerHTML = jobs.map(job => `
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
-                <div class="card-body">
-                    <h5 class="fw-bold">Job #${job.complaint_id}</h5>
-                    <p class="text-muted">${job.description}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-success fw-bold">${job.price ? `Accepted: ₹${job.price}` : 'Direct Assignment'}</span>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-info rounded-pill px-3 btn-progress" data-id="${job.id || job.complaint_id}">
-                                <i class="fas fa-tasks me-1"></i> Update
-                            </button>
-                            <button class="btn btn-sm btn-success rounded-pill px-3 btn-complete" data-id="${job.id || job.complaint_id}">
-                                Mark Completed
-                            </button>
+    if (jobs.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">You have no active or completed jobs yet.</p></div>';
+        return;
+    }
+
+    container.innerHTML = jobs.map(job => {
+        const isAwaitingPayment = job.status === 'Awaiting Payment';
+        return `
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold mb-0">Job #${job.id}</h5>
+                            <span class="badge ${isAwaitingPayment ? 'bg-warning text-dark' : 'bg-success text-white'} rounded-pill">
+                                ${job.status}
+                            </span>
                         </div>
+                        <p class="text-muted small mb-2">${job.description}</p>
+                        <div class="mb-3">
+                            <small class="text-muted">Citizen: <span class="text-dark fw-bold">${job.citizen_name || 'Anonymous'}</span></small><br>
+                            <small class="text-muted">Location: <span class="text-dark">${job.location}</span></small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-success fw-bold">₹${job.price || '0'}</span>
+                            <div class="btn-group">
+                                <button class="btn btn-sm ${isAwaitingPayment ? 'btn-outline-secondary' : 'btn-outline-info'} rounded-pill px-3 btn-progress" 
+                                        data-id="${job.id}" ${isAwaitingPayment ? 'disabled title="Awaiting citizen payment"' : ''}>
+                                    <i class="fas fa-tasks me-1"></i> Update
+                                </button>
+                                <button class="btn btn-sm btn-success rounded-pill px-3 btn-complete" 
+                                        data-id="${job.id}" ${isAwaitingPayment ? 'disabled' : ''}>
+                                    Mark Completed
+                                </button>
+                            </div>
+                        </div>
+                        ${isAwaitingPayment ? '<p class="text-warning small mt-2 mb-0"><i class="fas fa-exclamation-triangle me-1"></i> Awaiting citizen payment before you can start.</p>' : ''}
                     </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
     container.querySelectorAll('.btn-progress').forEach(btn => {
         btn.addEventListener('click', () => {
