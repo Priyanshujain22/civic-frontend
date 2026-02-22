@@ -822,11 +822,17 @@ async function initVendorDashboard() {
             const id = document.getElementById('updateComplaintId').value;
             const status = document.getElementById('updateStatus').value;
             const resolution_notes = document.getElementById('updateNotes').value;
+            const imageUrl = document.getElementById('updateProof')?.value || null;
 
+            // First update status
             const response = await API.updateComplaintStatus(id, status, resolution_notes);
 
             if (response.success) {
-                showAlert('Status Updated Successfully');
+                // Also post a job update so picture and description appear in the "progress box"
+                if (resolution_notes || imageUrl) {
+                    await API.postJobUpdate(id, `Status changed to ${status}: ${resolution_notes}`, imageUrl);
+                }
+                showAlert('Task Updated Successfully');
                 bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
                 loadData();
             } else {
