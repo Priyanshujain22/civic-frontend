@@ -760,6 +760,7 @@ async function initVendorDashboard() {
                         <td class="text-success fw-bold">₹${q.price}</td>
                         <td>${q.estimated_time}</td>
                         <td>${API.getStatusBadge ? API.getStatusBadge(q.status) : `<span class="badge bg-${q.status === 'Approved' ? 'success' : (q.status === 'Rejected' ? 'danger' : 'warning text-dark')}">${q.status}</span>`}</td>
+                        <td>${q.feedback_rating ? `<span class="text-warning"><i class="fas fa-star"></i> ${q.feedback_rating}/5</span>` : '<span class="text-muted small">Ratings Not Given Yet</span>'}</td>
                     </tr>
                 `).join('');
         }
