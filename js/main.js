@@ -894,110 +894,83 @@ function renderActiveJobs(jobs, container) {
     });
 }
 
- f u n c t i o n   i n i t P a y m e n t F o r m ( )   { 
-         c o n s t   f o r m   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' p a y m e n t F o r m ' ) ; 
-         i f   ( ! f o r m )   r e t u r n ; 
- 
-         f o r m . a d d E v e n t L i s t e n e r ( ' s u b m i t ' ,   a s y n c   ( e )   = >   { 
-                 e . p r e v e n t D e f a u l t ( ) ; 
-                 c o n s t   i d   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' p a y C o m p l a i n t I d ' ) . v a l u e ; 
-                 c o n s t   b t n   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' c o n f i r m P a y m e n t B t n ' ) ; 
-                 
-                 b t n . d i s a b l e d   =   t r u e ; 
-                 b t n . i n n e r H T M L   =   ' < i   c l a s s = \ 
- 
- f a s 
- 
- f a - s p i n n e r 
- 
- f a - s p i n 
- 
- m e - 2 \ > < / i > P r o c e s s i n g . . . ' ; 
- 
-                 c o n s t   r e s p o n s e   =   a w a i t   A P I . p a y C o m p l a i n t ( i d ) ; 
-                 i f   ( r e s p o n s e . s u c c e s s )   { 
-                         s h o w A l e r t ( ' P a y m e n t   S u c c e s s f u l ! ' ) ; 
-                         b o o t s t r a p . M o d a l . g e t I n s t a n c e ( d o c u m e n t . g e t E l e m e n t B y I d ( ' p a y m e n t M o d a l ' ) ) . h i d e ( ) ; 
-                         w i n d o w . l o c a t i o n . r e l o a d ( ) ;   
-                 
-        }   e l s e   { 
-                         s h o w A l e r t ( r e s p o n s e . m e s s a g e ,   ' d a n g e r ' ) ; 
-                 
-        } 
-                 b t n . d i s a b l e d   =   f a l s e ; 
-                 b t n . i n n e r H T M L   =   ' C o n f i r m   P a y m e n t ' ; 
-         
-    } ) ; 
- 
-} 
- 
- f u n c t i o n   i n i t F e e d b a c k F o r m ( )   { 
-         c o n s t   f o r m   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k F o r m ' ) ; 
-         i f   ( ! f o r m )   r e t u r n ; 
- 
-         / /   S t a r   r a t i n g   l o g i c 
-         c o n s t   s t a r s   =   d o c u m e n t . q u e r y S e l e c t o r A l l ( ' . s t a r - r a t i n g   i ' ) ; 
-         s t a r s . f o r E a c h ( s t a r   = >   { 
-                 s t a r . a d d E v e n t L i s t e n e r ( ' c l i c k ' ,   ( )   = >   { 
-                         c o n s t   r a t i n g   =   s t a r . d a t a s e t . r a t i n g ; 
-                         d o c u m e n t . g e t E l e m e n t B y I d ( ' s e l e c t e d R a t i n g ' ) . v a l u e   =   r a t i n g ; 
-                         
-                         / /   H i g h l i g h t   s t a r s 
-                         s t a r s . f o r E a c h ( s   = >   { 
-                                 i f   ( p a r s e I n t ( s . d a t a s e t . r a t i n g )   < =   p a r s e I n t ( r a t i n g ) )   { 
-                                         s . c l a s s L i s t . r e p l a c e ( ' f a r ' ,   ' f a s ' ) ; 
-                                         s . c l a s s L i s t . a d d ( ' t e x t - w a r n i n g ' ) ; 
-                                 
-                }   e l s e   { 
-                                         s . c l a s s L i s t . r e p l a c e ( ' f a s ' ,   ' f a r ' ) ; 
-                                         s . c l a s s L i s t . r e m o v e ( ' t e x t - w a r n i n g ' ) ; 
-                                 
-                } 
-                         
-            } ) ; 
-                 
-        } ) ; 
-         
-    } ) ; 
- 
-         f o r m . a d d E v e n t L i s t e n e r ( ' s u b m i t ' ,   a s y n c   ( e )   = >   { 
-                 e . p r e v e n t D e f a u l t ( ) ; 
-                 c o n s t   i d   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k C o m p l a i n t I d ' ) . v a l u e ; 
-                 c o n s t   r a t i n g   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' s e l e c t e d R a t i n g ' ) . v a l u e ; 
-                 c o n s t   c o m m e n t   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k C o m m e n t ' ) . v a l u e ; 
- 
-                 i f   ( r a t i n g   = =   0 )   { 
-                         s h o w A l e r t ( ' P l e a s e   s e l e c t   a   r a t i n g ' ,   ' w a r n i n g ' ) ; 
-                         r e t u r n ; 
-                 
-        } 
- 
-                 c o n s t   r e s p o n s e   =   a w a i t   A P I . p o s t F e e d b a c k ( i d ,   r a t i n g ,   c o m m e n t ) ; 
-                 i f   ( r e s p o n s e . s u c c e s s )   { 
-                         s h o w A l e r t ( ' T h a n k   y o u   f o r   y o u r   f e e d b a c k ! ' ) ; 
-                         b o o t s t r a p . M o d a l . g e t I n s t a n c e ( d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k M o d a l ' ) ) . h i d e ( ) ; 
-                         w i n d o w . l o c a t i o n . r e l o a d ( ) ; 
-                 
-        }   e l s e   { 
-                         s h o w A l e r t ( r e s p o n s e . m e s s a g e ,   ' d a n g e r ' ) ; 
-                 
-        } 
-         
-    } ) ; 
- 
-} 
- 
- f u n c t i o n   r e s e t F e e d b a c k M o d a l ( )   { 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' s e l e c t e d R a t i n g ' ) . v a l u e   =   ' 0 ' ; 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k C o m m e n t ' ) . v a l u e   =   ' ' ; 
-         c o n s t   s t a r s   =   d o c u m e n t . q u e r y S e l e c t o r A l l ( ' . s t a r - r a t i n g   i ' ) ; 
-         s t a r s . f o r E a c h ( s   = >   { 
-                 s . c l a s s L i s t . r e p l a c e ( ' f a s ' ,   ' f a r ' ) ; 
-                 s . c l a s s L i s t . r e m o v e ( ' t e x t - w a r n i n g ' ) ; 
-         
-    } ) ; 
- 
-} 
- 
- 
- 
+function initPaymentForm() {
+    const form = document.getElementById('paymentForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('payComplaintId').value;
+        const btn = document.getElementById('confirmPaymentBtn');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+        const response = await API.payComplaint(id);
+        if (response.success) {
+            showAlert('Payment Successful!');
+            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+            window.location.reload();
+        } else {
+            showAlert(response.message, 'danger');
+        }
+        btn.disabled = false;
+        btn.innerHTML = 'Confirm Payment';
+    });
+}
+
+function initFeedbackForm() {
+    const form = document.getElementById('feedbackForm');
+    if (!form) return;
+
+    // Star rating logic
+    const stars = document.querySelectorAll('.star-rating i');
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const rating = star.dataset.rating;
+            document.getElementById('selectedRating').value = rating;
+
+            // Highlight stars
+            stars.forEach(s => {
+                if (parseInt(s.dataset.rating) <= parseInt(rating)) {
+                    s.classList.replace('far', 'fas');
+                    s.classList.add('text-warning');
+                } else {
+                    s.classList.replace('fas', 'far');
+                    s.classList.remove('text-warning');
+                }
+            });
+        });
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('feedbackComplaintId').value;
+        const rating = document.getElementById('selectedRating').value;
+        const comment = document.getElementById('feedbackComment').value;
+
+        if (rating == 0) {
+            showAlert('Please select a rating', 'warning');
+            return;
+        }
+
+        const response = await API.postFeedback(id, rating, comment);
+        if (response.success) {
+            showAlert('Thank you for your feedback!');
+            bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide();
+            window.location.reload();
+        } else {
+            showAlert(response.message, 'danger');
+        }
+    });
+}
+
+function resetFeedbackModal() {
+    document.getElementById('selectedRating').value = '0';
+    document.getElementById('feedbackComment').value = '';
+    const stars = document.querySelectorAll('.star-rating i');
+    stars.forEach(s => {
+        s.classList.replace('fas', 'far');
+        s.classList.remove('text-warning');
+    });
+}
