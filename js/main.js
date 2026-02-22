@@ -206,6 +206,28 @@ async function initCitizenDashboard() {
                     priceSection.classList.add('d-none');
                 }
 
+                // Progress Timeline
+                const timelineSection = document.getElementById('timelineSection');
+                const timelineBody = document.getElementById('updateTimeline');
+                if (complaint.status === 'In Progress' || complaint.status === 'Resolved') {
+                    const updates = await API.fetchJobUpdates(id);
+                    if (updates && updates.length > 0) {
+                        timelineBody.innerHTML = updates.map(up => `
+                            <div class="mb-3 position-relative">
+                                <small class="text-muted d-block">${new Date(up.created_at).toLocaleString()}</small>
+                                <p class="mb-1 fw-bold text-dark">${up.message}</p>
+                                ${up.image_url ? `<img src="${up.image_url}" class="img-fluid rounded border mb-2" style="max-height: 200px;">` : ''}
+                                <small class="text-info d-block">By: ${up.business_name || 'Vendor'}</small>
+                            </div>
+                        `).join('');
+                        timelineSection.classList.remove('d-none');
+                    } else {
+                        timelineSection.classList.add('d-none');
+                    }
+                } else {
+                    timelineSection.classList.add('d-none');
+                }
+
                 new bootstrap.Modal(document.getElementById('viewModal')).show();
             }
         } else if (action === 'quotes') {
@@ -676,6 +698,25 @@ async function initVendorDashboard() {
         });
     }
 
+    if (document.getElementById('progressForm')) {
+        document.getElementById('progressForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const complaintId = document.getElementById('progressComplaintId').value;
+            const message = document.getElementById('progressMessage').value;
+            const imageUrl = document.getElementById('progressImage').value;
+
+            const response = await API.postJobUpdate(complaintId, message, imageUrl);
+            if (response.success) {
+                showAlert('Progress update posted!');
+                bootstrap.Modal.getInstance(document.getElementById('progressModal')).hide();
+                document.getElementById('progressForm').reset();
+                loadData();
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        });
+    }
+
     loadData();
 }
 
@@ -722,14 +763,26 @@ function renderActiveJobs(jobs, container) {
                     <p class="text-muted">${job.description}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-success fw-bold">${job.price ? `Accepted: ₹${job.price}` : 'Direct Assignment'}</span>
-                        <button class="btn btn-sm btn-success rounded-pill btn-complete" data-id="${job.id || job.complaint_id}">
-                            Mark Completed
-                        </button>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-info rounded-pill px-3 btn-progress" data-id="${job.id || job.complaint_id}">
+                                <i class="fas fa-tasks me-1"></i> Update
+                            </button>
+                            <button class="btn btn-sm btn-success rounded-pill px-3 btn-complete" data-id="${job.id || job.complaint_id}">
+                                Mark Completed
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     `).join('');
+
+    container.querySelectorAll('.btn-progress').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('progressComplaintId').value = btn.dataset.id;
+            new bootstrap.Modal(document.getElementById('progressModal')).show();
+        });
+    });
 
     container.querySelectorAll('.btn-complete').forEach(btn => {
         btn.addEventListener('click', async () => {

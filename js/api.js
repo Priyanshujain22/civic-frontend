@@ -190,6 +190,34 @@ export async function fetchComplaintQuotes(complaintId) {
     }
 }
 
+export async function postJobUpdate(complaint_id, message, image_url = null) {
+    try {
+        const response = await fetch(`${API_URL}/vendor/update`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ complaint_id, message, image_url })
+        });
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Post Update Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
+
+export async function fetchJobUpdates(complaintId) {
+    try {
+        const response = await fetch(`${API_URL}/complaints/${complaintId}/updates`, {
+            headers: getAuthHeader()
+        });
+        const result = await response.json();
+        return result.success ? result.data : [];
+    } catch (error) {
+        console.error('Fetch Updates Error:', error);
+        return [];
+    }
+}
+
 export async function approveQuote(complaintId, vendor_id) {
     try {
         const response = await fetch(`${API_URL}/quotes/${complaintId}/approve`, {
