@@ -141,23 +141,43 @@ async function initCitizenDashboard() {
     if (!myComplaints.length) {
         noData.classList.remove('d-none');
         return;
+    } else {
+        noData.classList.add('d-none'); // Hide if data is present
     }
 
-    tableBody.innerHTML = myComplaints.map(c => `
+    renderComplaints(myComplaints);
+    initPaymentForm();
+    initFeedbackForm();
+}
+
+function renderComplaints(complaints) {
+    const activeBody = document.getElementById('complaintsBody');
+    const pastBody = document.getElementById('pastComplaintsBody');
+    if (!activeBody || !pastBody) return;
+
+    // Separate complaints
+    const active = complaints.filter(c => c.status !== 'Resolved');
+    const past = complaints.filter(c => c.status === 'Resolved');
+
+    activeBody.innerHTML = active.map(c => `
         <tr>
-            <td>${c.id}</td>
-            <td>${c.category_name}</td>
-            <td class="text-truncate" style="max-width: 200px;">${c.description}</td>
+            <td><span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">${c.category_name}</span></td>
+            <td class="text-truncate" style="max-width: 250px;">${c.description}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td>${getStatusBadge(c.status)}</td>
             <td>
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-primary" data-action="view" data-id="${c.id}">
-                        <i class="fas fa-eye"></i> View
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3" data-action="view" data-id="${c.id}">
+                        <i class="fas fa-eye me-1"></i> View
                     </button>
                     ${c.status === 'Awaiting Quotes' ? `
-                        <button class="btn btn-sm btn-info text-white" data-action="quotes" data-id="${c.id}">
-                            <i class="fas fa-file-invoice-dollar"></i> Quotes
+                        <button class="btn btn-sm btn-info text-white rounded-pill px-3" data-action="quotes" data-id="${c.id}">
+                            <i class="fas fa-file-invoice-dollar me-1"></i> Quotes
+                        </button>
+                    ` : ''}
+                    ${c.status === 'Awaiting Payment' ? `
+                        <button class="btn btn-sm btn-warning rounded-pill px-3" data-action="pay" data-id="${c.id}" data-amount="${c.agreed_price}">
+                            <i class="fas fa-credit-card me-1"></i> Pay ₹${c.agreed_price}
                         </button>
                     ` : ''}
                 </div>
@@ -165,77 +185,108 @@ async function initCitizenDashboard() {
         </tr>
     `).join('');
 
-    // Event delegation
-    tableBody.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button');
-        if (!btn) return;
+    pastBody.innerHTML = past.map(c => `
+        <tr>
+            <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">${c.category_name}</span></td>
+            <td class="text-truncate" style="max-width: 250px;">${c.description}</td>
+            <td>${new Date(c.created_at).toLocaleDateString()}</td>
+            <td><span class="badge bg-success rounded-pill px-3">Resolved</span> ${c.payment_status === 'paid' ? '<i class="fas fa-check-circle text-success ms-1" title="Paid"></i>' : ''}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-success rounded-pill px-3" data-action="feedback" data-id="${c.id}">
+                    <i class="fas fa-star me-1"></i> Rate Vendor
+                </button>
+            </td>
+        </tr>
+    `).join('');
 
-        const id = btn.dataset.id;
-        const action = btn.dataset.action;
+    // Event delegation for both tables
+    [activeBody, pastBody].forEach(body => {
+        body.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
 
-        if (action === 'view') {
-            const complaint = complaints.find(c => c.id == id);
-            if (complaint) {
-                document.getElementById('viewCategory').innerText = complaint.category_name;
-                document.getElementById('viewDescription').innerText = complaint.description;
-                document.getElementById('viewLocation').innerText = complaint.location;
-                document.getElementById('viewStatus').innerHTML = getStatusBadge(complaint.status);
+            const id = btn.dataset.id;
+            const action = btn.dataset.action;
 
-                const resSection = document.getElementById('resolutionSection');
-                if (complaint.status === 'Resolved' && complaint.resolution_notes) {
-                    document.getElementById('viewResolutionNotes').innerText = complaint.resolution_notes;
-                    resSection.classList.remove('d-none');
-                } else {
-                    resSection.classList.add('d-none');
+            if (action === 'view') {
+                const complaint = complaints.find(c => c.id == id);
+                if (complaint) {
+                    showComplaintDetails(complaint);
                 }
-
-                // Vendor and Price
-                const vendorSection = document.getElementById('vendorSection');
-                const priceSection = document.getElementById('priceSection');
-                if (complaint.selected_vendor_id && complaint.vendor_name) {
-                    document.getElementById('viewVendor').innerText = complaint.vendor_name;
-                    vendorSection.classList.remove('d-none');
-                    if (complaint.agreed_price) {
-                        document.getElementById('viewPrice').innerText = `₹${complaint.agreed_price}`;
-                        priceSection.classList.remove('d-none');
-                    } else {
-                        priceSection.classList.add('d-none');
-                    }
-                } else {
-                    vendorSection.classList.add('d-none');
-                    priceSection.classList.add('d-none');
-                }
-
-                // Progress Timeline
-                const timelineSection = document.getElementById('timelineSection');
-                const timelineBody = document.getElementById('updateTimeline');
-                if (complaint.status === 'In Progress' || complaint.status === 'Resolved') {
-                    const updates = await API.fetchJobUpdates(id);
-                    if (updates && updates.length > 0) {
-                        timelineBody.innerHTML = updates.map(up => `
-                            <div class="mb-3 position-relative">
-                                <small class="text-muted d-block">${new Date(up.created_at).toLocaleString()}</small>
-                                <p class="mb-1 fw-bold text-dark">${up.message}</p>
-                                ${up.image_url ? `<img src="${up.image_url}" class="img-fluid rounded border mb-2" style="max-height: 200px;">` : ''}
-                                <small class="text-info d-block">By: ${up.business_name || 'Vendor'}</small>
-                            </div>
-                        `).join('');
-                        timelineSection.classList.remove('d-none');
-                    } else {
-                        timelineSection.classList.add('d-none');
-                    }
-                } else {
-                    timelineSection.classList.add('d-none');
-                }
-
-                new bootstrap.Modal(document.getElementById('viewModal')).show();
+            } else if (action === 'quotes') {
+                const modal = new bootstrap.Modal(document.getElementById('quotesModal'));
+                modal.show();
+                await loadQuotes(id);
+            } else if (action === 'pay') {
+                const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                document.getElementById('payComplaintId').value = id;
+                document.getElementById('payAmount').innerText = `₹${btn.dataset.amount}`;
+                modal.show();
+            } else if (action === 'feedback') {
+                const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+                document.getElementById('feedbackComplaintId').value = id;
+                resetFeedbackModal();
+                modal.show();
             }
-        } else if (action === 'quotes') {
-            const modal = new bootstrap.Modal(document.getElementById('quotesModal'));
-            modal.show();
-            await loadQuotes(id);
-        }
+        });
     });
+}
+
+function showComplaintDetails(complaint) {
+    document.getElementById('viewCategory').innerText = complaint.category_name;
+    document.getElementById('viewDescription').innerText = complaint.description;
+    document.getElementById('viewLocation').innerHTML = `<i class="fas fa-map-marker-alt text-danger me-2"></i> ${complaint.location}`;
+    document.getElementById('viewStatus').innerHTML = getStatusBadge(complaint.status);
+
+    const resSection = document.getElementById('resolutionSection');
+    if (complaint.status === 'Resolved' && complaint.resolution_notes) {
+        document.getElementById('viewResolutionNotes').innerText = complaint.resolution_notes;
+        resSection.classList.remove('d-none');
+    } else {
+        resSection.classList.add('d-none');
+    }
+
+    // Vendor and Price
+    const vendorSection = document.getElementById('vendorSection');
+    const priceSection = document.getElementById('priceSection');
+    if (complaint.selected_vendor_id && complaint.vendor_name) {
+        document.getElementById('viewVendor').innerText = complaint.vendor_name;
+        vendorSection.classList.remove('d-none');
+        if (complaint.agreed_price) {
+            document.getElementById('viewPrice').innerText = `₹${complaint.agreed_price}`;
+            priceSection.classList.remove('d-none');
+        } else {
+            priceSection.classList.add('d-none');
+        }
+    } else {
+        vendorSection.classList.add('d-none');
+        priceSection.classList.add('d-none');
+    }
+
+    // Progress Timeline
+    const timelineSection = document.getElementById('timelineSection');
+    const timelineBody = document.getElementById('updateTimeline');
+    if (complaint.status === 'In Progress' || complaint.status === 'Resolved') {
+        API.fetchJobUpdates(complaint.id).then(updates => {
+            if (updates && updates.length > 0) {
+                timelineBody.innerHTML = updates.map(up => `
+                    <div class="mb-3 position-relative">
+                        <small class="text-muted d-block">${new Date(up.created_at).toLocaleString()}</small>
+                        <p class="mb-1 fw-bold text-dark">${up.message}</p>
+                        ${up.image_url ? `<img src="${up.image_url}" class="img-fluid rounded border mb-2" style="max-height: 200px;">` : ''}
+                        <small class="text-info d-block">By: ${up.business_name || 'Vendor'}</small>
+                    </div>
+                `).join('');
+                timelineSection.classList.remove('d-none');
+            } else {
+                timelineSection.classList.add('d-none');
+            }
+        });
+    } else {
+        timelineSection.classList.add('d-none');
+    }
+
+    new bootstrap.Modal(document.getElementById('viewModal')).show();
 }
 
 async function loadQuotes(complaintId) {
@@ -257,7 +308,12 @@ async function loadQuotes(complaintId) {
         table.style.display = 'table';
         tableBody.innerHTML = quotes.map(q => `
             <tr>
-                <td><strong>${q.business_name || 'Vendor'}</strong></td>
+                <td>
+                    <strong>${q.business_name || 'Vendor'}</strong>
+                    <div class="small text-warning">
+                        ${q.rating ? `<i class="fas fa-star me-1"></i>${q.rating.toFixed(1)}` : '<i class="far fa-star me-1"></i>New'}
+                    </div>
+                </td>
                 <td class="text-success fw-bold">₹${q.price}</td>
                 <td>${q.estimated_time}</td>
                 <td>
@@ -274,8 +330,11 @@ async function loadQuotes(complaintId) {
                 if (confirm('Are you sure you want to hire this vendor?')) {
                     const res = await API.approveQuote(btn.dataset.complaint, btn.dataset.vendor);
                     if (res.success) {
-                        showAlert('Vendor hired successfully!');
-                        location.reload();
+                        showAlert('Vendor selected! Please complete payment to start the job.');
+                        bootstrap.Modal.getInstance(document.getElementById('quotesModal')).hide();
+                        window.location.reload(); // Refresh to show 'Awaiting Payment' button
+                    } else {
+                        showAlert(res.message, 'danger');
                     }
                 }
             });
@@ -796,3 +855,111 @@ function renderActiveJobs(jobs, container) {
         });
     });
 }
+
+ f u n c t i o n   i n i t P a y m e n t F o r m ( )   { 
+         c o n s t   f o r m   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' p a y m e n t F o r m ' ) ; 
+         i f   ( ! f o r m )   r e t u r n ; 
+ 
+         f o r m . a d d E v e n t L i s t e n e r ( ' s u b m i t ' ,   a s y n c   ( e )   = >   { 
+                 e . p r e v e n t D e f a u l t ( ) ; 
+                 c o n s t   i d   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' p a y C o m p l a i n t I d ' ) . v a l u e ; 
+                 c o n s t   b t n   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' c o n f i r m P a y m e n t B t n ' ) ; 
+                 
+                 b t n . d i s a b l e d   =   t r u e ; 
+                 b t n . i n n e r H T M L   =   ' < i   c l a s s = \ 
+ 
+ f a s 
+ 
+ f a - s p i n n e r 
+ 
+ f a - s p i n 
+ 
+ m e - 2 \ > < / i > P r o c e s s i n g . . . ' ; 
+ 
+                 c o n s t   r e s p o n s e   =   a w a i t   A P I . p a y C o m p l a i n t ( i d ) ; 
+                 i f   ( r e s p o n s e . s u c c e s s )   { 
+                         s h o w A l e r t ( ' P a y m e n t   S u c c e s s f u l ! ' ) ; 
+                         b o o t s t r a p . M o d a l . g e t I n s t a n c e ( d o c u m e n t . g e t E l e m e n t B y I d ( ' p a y m e n t M o d a l ' ) ) . h i d e ( ) ; 
+                         w i n d o w . l o c a t i o n . r e l o a d ( ) ;   
+                 
+        }   e l s e   { 
+                         s h o w A l e r t ( r e s p o n s e . m e s s a g e ,   ' d a n g e r ' ) ; 
+                 
+        } 
+                 b t n . d i s a b l e d   =   f a l s e ; 
+                 b t n . i n n e r H T M L   =   ' C o n f i r m   P a y m e n t ' ; 
+         
+    } ) ; 
+ 
+} 
+ 
+ f u n c t i o n   i n i t F e e d b a c k F o r m ( )   { 
+         c o n s t   f o r m   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k F o r m ' ) ; 
+         i f   ( ! f o r m )   r e t u r n ; 
+ 
+         / /   S t a r   r a t i n g   l o g i c 
+         c o n s t   s t a r s   =   d o c u m e n t . q u e r y S e l e c t o r A l l ( ' . s t a r - r a t i n g   i ' ) ; 
+         s t a r s . f o r E a c h ( s t a r   = >   { 
+                 s t a r . a d d E v e n t L i s t e n e r ( ' c l i c k ' ,   ( )   = >   { 
+                         c o n s t   r a t i n g   =   s t a r . d a t a s e t . r a t i n g ; 
+                         d o c u m e n t . g e t E l e m e n t B y I d ( ' s e l e c t e d R a t i n g ' ) . v a l u e   =   r a t i n g ; 
+                         
+                         / /   H i g h l i g h t   s t a r s 
+                         s t a r s . f o r E a c h ( s   = >   { 
+                                 i f   ( p a r s e I n t ( s . d a t a s e t . r a t i n g )   < =   p a r s e I n t ( r a t i n g ) )   { 
+                                         s . c l a s s L i s t . r e p l a c e ( ' f a r ' ,   ' f a s ' ) ; 
+                                         s . c l a s s L i s t . a d d ( ' t e x t - w a r n i n g ' ) ; 
+                                 
+                }   e l s e   { 
+                                         s . c l a s s L i s t . r e p l a c e ( ' f a s ' ,   ' f a r ' ) ; 
+                                         s . c l a s s L i s t . r e m o v e ( ' t e x t - w a r n i n g ' ) ; 
+                                 
+                } 
+                         
+            } ) ; 
+                 
+        } ) ; 
+         
+    } ) ; 
+ 
+         f o r m . a d d E v e n t L i s t e n e r ( ' s u b m i t ' ,   a s y n c   ( e )   = >   { 
+                 e . p r e v e n t D e f a u l t ( ) ; 
+                 c o n s t   i d   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k C o m p l a i n t I d ' ) . v a l u e ; 
+                 c o n s t   r a t i n g   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' s e l e c t e d R a t i n g ' ) . v a l u e ; 
+                 c o n s t   c o m m e n t   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k C o m m e n t ' ) . v a l u e ; 
+ 
+                 i f   ( r a t i n g   = =   0 )   { 
+                         s h o w A l e r t ( ' P l e a s e   s e l e c t   a   r a t i n g ' ,   ' w a r n i n g ' ) ; 
+                         r e t u r n ; 
+                 
+        } 
+ 
+                 c o n s t   r e s p o n s e   =   a w a i t   A P I . p o s t F e e d b a c k ( i d ,   r a t i n g ,   c o m m e n t ) ; 
+                 i f   ( r e s p o n s e . s u c c e s s )   { 
+                         s h o w A l e r t ( ' T h a n k   y o u   f o r   y o u r   f e e d b a c k ! ' ) ; 
+                         b o o t s t r a p . M o d a l . g e t I n s t a n c e ( d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k M o d a l ' ) ) . h i d e ( ) ; 
+                         w i n d o w . l o c a t i o n . r e l o a d ( ) ; 
+                 
+        }   e l s e   { 
+                         s h o w A l e r t ( r e s p o n s e . m e s s a g e ,   ' d a n g e r ' ) ; 
+                 
+        } 
+         
+    } ) ; 
+ 
+} 
+ 
+ f u n c t i o n   r e s e t F e e d b a c k M o d a l ( )   { 
+         d o c u m e n t . g e t E l e m e n t B y I d ( ' s e l e c t e d R a t i n g ' ) . v a l u e   =   ' 0 ' ; 
+         d o c u m e n t . g e t E l e m e n t B y I d ( ' f e e d b a c k C o m m e n t ' ) . v a l u e   =   ' ' ; 
+         c o n s t   s t a r s   =   d o c u m e n t . q u e r y S e l e c t o r A l l ( ' . s t a r - r a t i n g   i ' ) ; 
+         s t a r s . f o r E a c h ( s   = >   { 
+                 s . c l a s s L i s t . r e p l a c e ( ' f a s ' ,   ' f a r ' ) ; 
+                 s . c l a s s L i s t . r e m o v e ( ' t e x t - w a r n i n g ' ) ; 
+         
+    } ) ; 
+ 
+} 
+ 
+ 
+ 

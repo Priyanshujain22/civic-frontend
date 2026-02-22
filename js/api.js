@@ -218,6 +218,35 @@ export async function fetchJobUpdates(complaintId) {
     }
 }
 
+export async function payComplaint(complaintId) {
+    try {
+        const response = await fetch(`${API_URL}/complaints/${complaintId}/pay`, {
+            method: 'POST',
+            headers: getAuthHeader()
+        });
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Payment Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
+
+export async function postFeedback(complaintId, rating, comment = '') {
+    try {
+        const response = await fetch(`${API_URL}/complaints/${complaintId}/feedback`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ rating, comment })
+        });
+        const result = await response.json();
+        return result.success ? { success: true } : { success: false, message: result.message };
+    } catch (error) {
+        console.error('Feedback Error:', error);
+        return { success: false, message: 'Network error' };
+    }
+}
+
 export async function approveQuote(complaintId, vendor_id) {
     try {
         const response = await fetch(`${API_URL}/quotes/${complaintId}/approve`, {

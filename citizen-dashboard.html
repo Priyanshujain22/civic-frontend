@@ -26,24 +26,66 @@
         </div>
 
         <!-- Complaint Table -->
-        <div class="card shadow">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="complaintTable">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Complaint ID</th>
-                                <th>Category</th>
-                                <th>Problem</th>
-                                <th>Date Filed</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="complaintTableBody">
-                            <!-- Populated via JS -->
-                        </tbody>
-                    </table>
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <ul class="nav nav-tabs card-header-tabs" id="complaintTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active fw-bold" id="active-tab" data-bs-toggle="tab"
+                                    data-bs-target="#active-complaints" type="button"><i
+                                        class="fas fa-spinner fa-spin-slow me-2 text-primary"></i>Active
+                                    Complaints</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link fw-bold" id="past-tab" data-bs-toggle="tab"
+                                    data-bs-target="#past-history" type="button"><i
+                                        class="fas fa-history me-2 text-muted"></i>Past History</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="tab-content">
+                            <!-- Active Complaints Tab -->
+                            <div class="tab-pane fade show active" id="active-complaints">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0" id="complaintsTable">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>Description</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="complaintsBody">
+                                            <!-- Complaints injected here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Past History Tab -->
+                            <div class="tab-pane fade" id="past-history">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0" id="pastComplaintsTable">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>Description</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                                <th>My Feedback</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pastComplaintsBody">
+                                            <!-- Resolved complaints injected here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,6 +149,86 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal (Simulation) -->
+    <div class="modal fade" id="paymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-credit-card me-2"></i>Secure Payment Simulation</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="paymentForm">
+                        <input type="hidden" id="payComplaintId">
+                        <div class="bg-light p-3 rounded mb-4 text-center">
+                            <h6 class="text-muted mb-1">Amount to Pay</h6>
+                            <h3 class="fw-bold text-success" id="payAmount">₹0</h3>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Card Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                <input type="text" class="form-control" value="**** **** **** 1234" disabled>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col">
+                                <label class="form-label small text-muted">Expiry</label>
+                                <input type="text" class="form-control" value="09/28" disabled>
+                            </div>
+                            <div class="col">
+                                <label class="form-label small text-muted">CVV</label>
+                                <input type="password" class="form-control" value="***" disabled>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill" id="confirmPaymentBtn">
+                                Confirm Payment
+                            </button>
+                        </div>
+                        <p class="text-center mt-3 small text-muted">
+                            <i class="fas fa-lock me-1"></i> Simulated payment. No real money will be charged.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-star me-2"></i>Rate Your Experience</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <form id="feedbackForm">
+                        <input type="hidden" id="feedbackComplaintId">
+                        <p class="text-muted">How would you rate the service provided?</p>
+                        <div class="star-rating mb-4 fs-2 text-warning">
+                            <i class="far fa-star cursor-pointer" data-rating="1"></i>
+                            <i class="far fa-star cursor-pointer" data-rating="2"></i>
+                            <i class="far fa-star cursor-pointer" data-rating="3"></i>
+                            <i class="far fa-star cursor-pointer" data-rating="4"></i>
+                            <i class="far fa-star cursor-pointer" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="selectedRating" value="0">
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-bold">Comments (Optional)</label>
+                            <textarea class="form-control" id="feedbackComment" rows="3"
+                                placeholder="Tell us about the vendor's work..."></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg rounded-pill">Submit Feedback</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
