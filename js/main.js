@@ -594,6 +594,20 @@ async function initOfficerDashboard() {
                     </p>
                     <p class="card-text">${task.description}</p>
                     <p class="small text-muted">Reported by: ${task.citizen_name} on ${new Date(task.created_at).toLocaleDateString()}</p>
+                    ${task.status === 'Resolved' ? `
+                        <div class="mt-3 p-3 bg-light rounded border border-warning">
+                            <h6 class="text-warning mb-1"><i class="fas fa-star me-1"></i> Citizen Feedback</h6>
+                            ${task.feedback_rating ? `
+                                <div class="text-warning mb-1">
+                                    ${[1, 2, 3, 4, 5].map(i => `<i class="${i <= task.feedback_rating ? 'fas' : 'far'} fa-star"></i>`).join('')}
+                                    <span class="text-dark ms-2 fw-bold">${task.feedback_rating}/5</span>
+                                </div>
+                                <p class="small mb-0 fst-italic text-muted">"${task.feedback_comment || 'No comment provided.'}"</p>
+                            ` : `
+                                <p class="small text-muted mb-0 fst-italic">Rating not given</p>
+                            `}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="card-footer bg-white border-top-0">
                     ${task.status === 'Resolved' ? `
