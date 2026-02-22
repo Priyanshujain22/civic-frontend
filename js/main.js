@@ -313,39 +313,6 @@ async function initAdminDashboard() {
         </tr>
     `).join('');
 
-    // --- Helper functions for populating dropdowns ---
-    async function populateOfficers(category) {
-        const officers = await API.fetchUsers('officer', category || null);
-        const officerSelect = document.getElementById('officerSelect');
-        if (officerSelect) {
-            if (officers.length === 0 && category) {
-                // Fallback: show all officers if none match the category
-                const allOfficers = await API.fetchUsers('officer');
-                officerSelect.innerHTML = '<option value="">Select Officer...</option>' +
-                    allOfficers.map(o => `<option value="${o.id}">${o.name} (${o.department || 'General'})</option>`).join('');
-            } else {
-                officerSelect.innerHTML = '<option value="">Select Officer...</option>' +
-                    officers.map(o => `<option value="${o.id}">${o.name} (${o.department || 'General'})</option>`).join('');
-            }
-        }
-    }
-
-    async function populateVendors(category) {
-        const vendors = await API.fetchUsers('vendor', category || null);
-        const vendorSelect = document.getElementById('vendorSelect');
-        if (vendorSelect) {
-            if (vendors.length === 0 && category) {
-                // Fallback: show all vendors if none match the category
-                const allVendors = await API.fetchUsers('vendor');
-                vendorSelect.innerHTML = '<option value="">Select Vendor...</option>' +
-                    allVendors.map(v => `<option value="${v.id}">${v.name} (${v.service_type || 'Private'})</option>`).join('');
-            } else {
-                vendorSelect.innerHTML = '<option value="">Select Vendor...</option>' +
-                    vendors.map(v => `<option value="${v.id}">${v.name} (${v.service_type || 'Private'})</option>`).join('');
-            }
-        }
-    }
-
     // Event delegation for Dispatch buttons
     tableBody.addEventListener('click', async (e) => {
         const btn = e.target.closest('button[data-action="dispatch"]');
@@ -362,31 +329,9 @@ async function initAdminDashboard() {
             if (govCategoryFilter) govCategoryFilter.value = category;
             if (privateCategoryFilter) privateCategoryFilter.value = category;
 
-            // Populate officers and vendors (show all initially)
-            await Promise.all([
-                populateOfficers(null),
-                populateVendors(null)
-            ]);
-
             new bootstrap.Modal(document.getElementById('dispatchModal')).show();
         }
     });
-
-    // Category filter change for Government (officers)
-    const govCategoryFilter = document.getElementById('govCategoryFilter');
-    if (govCategoryFilter) {
-        govCategoryFilter.addEventListener('change', async (e) => {
-            await populateOfficers(e.target.value);
-        });
-    }
-
-    // Category filter change for Private (vendors)
-    const privateCategoryFilter = document.getElementById('privateCategoryFilter');
-    if (privateCategoryFilter) {
-        privateCategoryFilter.addEventListener('change', async (e) => {
-            await populateVendors(e.target.value);
-        });
-    }
 
     // Toggle dispatch fields (Government vs Private)
     document.querySelectorAll('input[name="resolutionType"]').forEach(radio => {
@@ -397,8 +342,6 @@ async function initAdminDashboard() {
         });
     });
 
-    // Private method is always direct vendor assignment (marketplace bidding removed)
-
     // Dispatch Form Submit
     document.getElementById('dispatchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -407,13 +350,9 @@ async function initAdminDashboard() {
 
         let response;
         if (resType === 'private') {
-            const vendorId = document.getElementById('vendorSelect').value;
-            if (!vendorId) return showAlert('Please select a vendor', 'danger');
-            response = await API.routeToVendor(id, vendorId);
+            response = await API.routeToPrivate(id);
         } else {
-            const officerId = document.getElementById('officerSelect').value;
-            if (!officerId) return showAlert('Please select an officer', 'danger');
-            response = await API.routeToGovernment(id, officerId);
+            response = await API.routeToGovernment(id);
         }
 
         if (response.success) {
