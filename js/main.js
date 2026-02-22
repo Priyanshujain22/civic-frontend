@@ -313,6 +313,48 @@ async function initAdminDashboard() {
         </tr>
     `).join('');
 
+    // Helper to populate officers based on category
+    async function populateOfficers(category = '') {
+        const officerSelect = document.getElementById('officerSelect');
+        if (!officerSelect) return;
+
+        officerSelect.innerHTML = '<option value="">Loading officers...</option>';
+        const res = await API.fetchUsers('officer', category);
+
+        if (res.success && res.data) {
+            officerSelect.innerHTML = '<option value="">Select Officer...</option>';
+            res.data.forEach(off => {
+                const opt = document.createElement('option');
+                opt.value = off.id;
+                opt.textContent = `${off.name} (${off.department || 'General'})`;
+                officerSelect.appendChild(opt);
+            });
+        } else {
+            officerSelect.innerHTML = '<option value="">No officers found for this category</option>';
+        }
+    }
+
+    // Helper to populate vendors based on category
+    async function populateVendors(category = '') {
+        const vendorSelect = document.getElementById('vendorSelect');
+        if (!vendorSelect) return;
+
+        vendorSelect.innerHTML = '<option value="">Loading vendors...</option>';
+        const res = await API.fetchUsers('vendor', category);
+
+        if (res.success && res.data) {
+            vendorSelect.innerHTML = '<option value="">Select Vendor...</option>';
+            res.data.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.id;
+                opt.textContent = `${v.name} (${v.business_name || 'Vendor'})`;
+                vendorSelect.appendChild(opt);
+            });
+        } else {
+            vendorSelect.innerHTML = '<option value="">No vendors found for this category</option>';
+        }
+    }
+
     // Event delegation for Dispatch buttons
     tableBody.addEventListener('click', async (e) => {
         const btn = e.target.closest('button[data-action="dispatch"]');
@@ -329,9 +371,17 @@ async function initAdminDashboard() {
             if (govCategoryFilter) govCategoryFilter.value = category;
             if (privateCategoryFilter) privateCategoryFilter.value = category;
 
+            // Initial population of dropdowns based on complaint category
+            populateOfficers(category);
+            populateVendors(category);
+
             new bootstrap.Modal(document.getElementById('dispatchModal')).show();
         }
     });
+
+    // Handle Category Filter changes in the modal
+    document.getElementById('govCategoryFilter')?.addEventListener('change', (e) => populateOfficers(e.target.value));
+    document.getElementById('privateCategoryFilter')?.addEventListener('change', (e) => populateVendors(e.target.value));
 
     // Toggle dispatch fields (Government vs Private)
     document.querySelectorAll('input[name="resolutionType"]').forEach(radio => {
@@ -350,9 +400,15 @@ async function initAdminDashboard() {
 
         let response;
         if (resType === 'private') {
-            response = await API.routeToPrivate(id);
+            const vendor_id = document.getElementById('vendorSelect').value;
+            if (vendor_id) {
+                response = await API.routeToVendor(id, vendor_id);
+            } else {
+                response = await API.routeToPrivate(id);
+            }
         } else {
-            response = await API.routeToGovernment(id);
+            const officer_id = document.getElementById('officerSelect').value;
+            response = await API.routeToGovernment(id, officer_id || null);
         }
 
         if (response.success) {
