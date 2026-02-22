@@ -435,7 +435,7 @@ async function initAdminDashboard() {
             <td class="text-truncate" style="max-width: 200px;">${c.description}</td>
             <td>${new Date(c.created_at).toLocaleDateString()}</td>
             <td>${getStatusBadge(c.status)}</td>
-            <td>${c.officer_name || '<span class="text-muted">Unassigned</span>'}</td>
+            <td>${c.officer_name || c.vendor_name || '<span class="text-muted">Unassigned</span>'}</td>
             <td>
                 ${c.status === 'Resolved' ? `
                     <button class="btn btn-sm btn-success w-100" disabled>
