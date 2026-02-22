@@ -319,11 +319,11 @@ async function initAdminDashboard() {
         if (!officerSelect) return;
 
         officerSelect.innerHTML = '<option value="">Loading officers...</option>';
-        const res = await API.fetchUsers('officer', category);
+        const users = await API.fetchUsers('officer', category);
 
-        if (res.success && res.data) {
+        if (users && users.length > 0) {
             officerSelect.innerHTML = '<option value="">Select Officer...</option>';
-            res.data.forEach(off => {
+            users.forEach(off => {
                 const opt = document.createElement('option');
                 opt.value = off.id;
                 opt.textContent = `${off.name} (${off.department || 'General'})`;
@@ -340,11 +340,11 @@ async function initAdminDashboard() {
         if (!vendorSelect) return;
 
         vendorSelect.innerHTML = '<option value="">Loading vendors...</option>';
-        const res = await API.fetchUsers('vendor', category);
+        const users = await API.fetchUsers('vendor', category);
 
-        if (res.success && res.data) {
+        if (users && users.length > 0) {
             vendorSelect.innerHTML = '<option value="">Select Vendor...</option>';
-            res.data.forEach(v => {
+            users.forEach(v => {
                 const opt = document.createElement('option');
                 opt.value = v.id;
                 opt.textContent = `${v.name} (${v.business_name || 'Vendor'})`;
